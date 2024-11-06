@@ -53,7 +53,8 @@ function App() {
     const playerResults = players.map(player => {
       const startingValue = player.startStack * coinValue;
       const endingValue = player.endStack * coinValue;
-      return { ...player, startingValue, endingValue, result: endingValue - startingValue };
+      const result = endingValue - startingValue
+      return { ...player, startingValue, endingValue, result};
     });
 
     const payouts = [];
@@ -76,6 +77,7 @@ function App() {
 
   return (
     <div className="App">
+
       <div className="content-box">
         <h1>Poker Score Calculator</h1>
         <p>Enter player details, coin value, and starting/ending stacks to calculate payouts.</p>
@@ -100,6 +102,7 @@ function App() {
           <span>Name</span>
           <span>Starting Stack</span>
           <span>Ending Stack</span>
+          <div className="col10"></div>
         </div>
 
         {players.map((player, index) => (

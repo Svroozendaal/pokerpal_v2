@@ -1,4 +1,4 @@
-* {
+*{
   box-sizing: border-box;
 }
 
@@ -11,7 +11,7 @@
 }
 
 .content-box {
-  background: #fff;
+  background: #b0b0b0;;
   padding: 20px;
   max-width: 500px;
   width: 100%;
@@ -21,12 +21,18 @@
 }
 
 h1 {
-  font-size: 24px;
+  font-size: 30px !important;
   margin-bottom: 10px;
+  font-weight:700 !important;
+}
+
+h2{
+  font-size: 24px;
+  font-weight:600 !important;
 }
 
 p {
-  color: #666;
+  color: #232323;
 }
 
 .setup {
@@ -43,26 +49,37 @@ p {
   display: flex;
   gap: 10px;
   margin: 10px 0;
+  justify-content: center;
 }
 
-.player-input input, .headers span {
+.headers .col10{
+  width:10%;
+}
+
+.headers span {
   width: 30%;
   text-align: left;
+  font-size:14px;
+  padding-left:6px;
 }
 
 input {
-  padding: 8px;
-  border: 1px solid #ddd;
+  width: 30%;
+  text-align: left;
+  padding: 6px 8px;
+  border: 0px solid #ddd;
   border-radius: 4px;
   width: 100%;
+  font-size:14px;
 }
 
 button {
-  padding: 10px 15px;
+  padding: 6px 20px;
   border: none;
   background-color: #28a745;
   color: white;
-  font-weight: bold;
+  font-size:14px;
+  font-weight: 400;
   border-radius: 4px;
   cursor: pointer;
 }

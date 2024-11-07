@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/pokerpal_v2/static/css/main.c78830af.css",
-    "main.js": "/pokerpal_v2/static/js/main.43e2b5cf.js",
+    "main.js": "/pokerpal_v2/static/js/main.fdb52865.js",
     "static/js/453.e13292bd.chunk.js": "/pokerpal_v2/static/js/453.e13292bd.chunk.js",
     "index.html": "/pokerpal_v2/index.html",
     "main.c78830af.css.map": "/pokerpal_v2/static/css/main.c78830af.css.map",
-    "main.43e2b5cf.js.map": "/pokerpal_v2/static/js/main.43e2b5cf.js.map",
+    "main.fdb52865.js.map": "/pokerpal_v2/static/js/main.fdb52865.js.map",
     "453.e13292bd.chunk.js.map": "/pokerpal_v2/static/js/453.e13292bd.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.c78830af.css",
-    "static/js/main.43e2b5cf.js"
+    "static/js/main.fdb52865.js"
   ]
 }

@@ -1,17 +1,35 @@
+// App.js
 import React, { useState, useEffect } from 'react';
-import './App.css';
+
+
+import { Typography, Button, Grid2 } from '@mui/material';
+import AppContainer from './components/AppContainer';
+import SetupInputs from './components/SetupInputs';
+import PlayerInput from './components/PlayerInput';
+import TotalStackDisplay from './components/TotalStackDisplay';
+import ResultsTable from './components/ResultsTable';
+import PayoutsDisplay from './components/PayoutsDisplay';
+import DiscrepancyModal from './components/DiscrepancyModal';
+import ResultsDialog from './components/ResultsDialog';
+import darkTheme from './theme';
+import ResultsDisplay from './components/ResultsDisplay';
+
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+
 
 function App() {
   const [players, setPlayers] = useState([{ name: '', startStack: '', endStack: '' }]);
   const [coinValue, setCoinValue] = useState('');
   const [buyInValue, setBuyInValue] = useState('');
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState({ playerResults: [], payouts: [] });
   const [potValue, setPotValue] = useState(0);
   const [discrepancy, setDiscrepancy] = useState(0);
   const [showDiscrepancyModal, setShowDiscrepancyModal] = useState(false);
-
   const [totalStartingStack, setTotalStartingStack] = useState(0);
   const [totalEndingStack, setTotalEndingStack] = useState(0);
+  const [showResultsDialog, setShowResultsDialog] = useState(false); // State to control results popup
+  
 
   useEffect(() => {
     const totalStarting = players.reduce((acc, player) => acc + (parseFloat(player.startStack) || 0), 0);
@@ -26,13 +44,7 @@ function App() {
     setPlayers(newPlayers);
   };
 
-  const addPlayer = () => {
-    setPlayers([...players, { name: '', startStack: buyInValue, endStack: '' }]);
-  };
-
-  const removePlayer = (index) => {
-    setPlayers(players.filter((_, i) => i !== index));
-  };
+  const addPlayer = () => setPlayers([...players, { name: '', startStack: buyInValue, endStack: '' }]);
 
   const checkStackDiscrepancy = () => {
     const discrepancy = totalStartingStack - totalEndingStack;
@@ -50,11 +62,11 @@ function App() {
     const totalPot = totalEndingStack * coinValue;
     setPotValue(totalPot);
 
-    const playerResults = players.map(player => {
+    const playerResults = players.map((player) => {
       const startingValue = player.startStack * coinValue;
       const endingValue = player.endStack * coinValue;
-      const result = endingValue - startingValue
-      return { ...player, startingValue, endingValue, result};
+      const result = endingValue - startingValue;
+      return { ...player, startingValue, endingValue, result };
     });
 
     const payouts = [];
@@ -73,123 +85,81 @@ function App() {
     });
 
     setResults({ playerResults, payouts });
+    setShowResultsDialog(true); // Show results popup
   };
 
+
+
+
+// -------------- Styling below -------------
   return (
-    <div className="App">
-      test
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <AppContainer>
+        <Grid2 container direction="column" spacing={4}>
+          <Grid2 item>
+            <Typography variant="h4" align="center" gutterBottom>
+              Poker Score Calculator
+            </Typography>
+            <Typography variant="subtitle1" align="center" gutterBottom>
+              Enter player details, coin value, and starting/ending stacks to calculate payouts.
+            </Typography>
+          </Grid2>
 
-      <div className="content-box">
-        <h1>Poker Score Calculator</h1>
-        <p>Enter player details, coin value, and starting/ending stacks to calculate payouts.</p>
-
-        <div className="setup">
-          <input
-            type="number"
-            placeholder="Coin Value (€)"
-            value={coinValue}
-            onChange={(e) => setCoinValue(parseFloat(e.target.value))}
-          />
-          <input
-            type="number"
-            placeholder="Buy-in Value (chips)"
-            value={buyInValue}
-            onChange={(e) => setBuyInValue(parseFloat(e.target.value))}
-          />
-        </div>
-
-        <h2>Players</h2>
-        <div className="player-input headers">
-          <span>Name</span>
-          <span>Starting Stack</span>
-          <span>Ending Stack</span>
-          <div className="col10"></div>
-        </div>
-
-        {players.map((player, index) => (
-          <div key={index} className="player-input">
-            <input
-              type="text"
-              placeholder="Name"
-              value={player.name}
-              onChange={(e) => handlePlayerChange(index, 'name', e.target.value)}
+          <Grid2 item>
+            <SetupInputs
+              coinValue={coinValue}
+              setCoinValue={setCoinValue}
+              buyInValue={buyInValue}
+              setBuyInValue={setBuyInValue}
+              totalStartingStack={totalStartingStack}
+              totalEndingStack={totalEndingStack}
+              calculatePayouts={calculatePayouts}
             />
-            <input
-              type="number"
-              placeholder="Starting Stack"
-              value={player.startStack}
-              step={buyInValue}
-              onChange={(e) => handlePlayerChange(index, 'startStack', parseFloat(e.target.value))}
-            />
-            <input
-              type="number"
-              placeholder="Ending Stack"
-              value={player.endStack}
-              step={buyInValue}
-              onChange={(e) => handlePlayerChange(index, 'endStack', parseFloat(e.target.value))}
-            />
-            <button onClick={() => removePlayer(index)} className="remove-button">X</button>
-          </div>
-        ))}
+          </Grid2>
 
-        <button onClick={addPlayer}>Add Player</button>
+          <Grid2 item>
+            <Typography variant="h5" gutterBottom>
+              Players
+            </Typography>
+            {players.map((player, index) => (
+              <PlayerInput
+                key={index}
+                player={player}
+                index={index}
+                handlePlayerChange={handlePlayerChange}
+                removePlayer={() => setPlayers(players.filter((_, i) => i !== index))}
+                buyInValue={buyInValue}
+              />
+            ))}
+            <Button variant="contained" color="primary" onClick={addPlayer} fullWidth>
+              Add Player
+            </Button>
+          </Grid2>
 
-        <div className="total-stack-display">
-          <p>Total Starting Pot: {totalStartingStack}</p>
-          <p>Total Ending Pot: {totalEndingStack}</p>
-        </div>
-
-        <button onClick={calculatePayouts}>Calculate</button>
-
-        <div className="results-box">
-          <h2>Results</h2>
-          {results.playerResults && (
-            <div>
-              <h3>Total Pot Value: €{potValue.toFixed(2)}</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Starting (€)</th>
-                    <th>Ending (€)</th>
-                    <th>Result (€)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.playerResults.map((player, index) => (
-                    <tr key={index}>
-                      <td>{player.name}</td>
-                      <td>{player.startingValue.toFixed(2)}</td>
-                      <td>{player.endingValue.toFixed(2)}</td>
-                      <td>{player.result.toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              <h3>Payouts</h3>
-              {results.payouts.length > 0 ? (
-                results.payouts.map((payout, index) => <p key={index}>{payout}</p>)
-              ) : (
-                <p>No payouts necessary.</p>
-              )}
-            </div>
+          {results.playerResults && results.playerResults.length > 0 && (
+            <Grid2 item>
+              <ResultsDisplay results={results} potValue={potValue} />
+            </Grid2>
           )}
-        </div>
-      </div>
 
-      {showDiscrepancyModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <p>
-              The starting and ending stacks are not equal. 
-              Discrepancy: €{Math.abs(discrepancy).toFixed(2)}. Adjust values before calculating.
-            </p>
-            <button onClick={() => setShowDiscrepancyModal(false)}>OK, Adjust Values</button>
-          </div>
-        </div>
-      )}
-    </div>
+          <DiscrepancyModal
+            open={showDiscrepancyModal}
+            onClose={() => setShowDiscrepancyModal(false)}
+            discrepancy={discrepancy}
+          />
+
+                    {/* Results Popup */}
+          <ResultsDialog
+              open={showResultsDialog}
+              onClose={() => setShowResultsDialog(false)}
+              results={results}
+              potValue={potValue}
+            />
+
+        </Grid2>
+      </AppContainer>
+    </ThemeProvider>
   );
 }
 

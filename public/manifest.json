@@ -1,25 +1,30 @@
 {
   "short_name": "PokerPal",
-  "name": "PokerPal - Poker Score Calculator",
+  "name": "PokerPal - Smart Poker Payout Calculator",
   "icons": [
     {
-      "src": "images/favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "images/Pokerpal_logo16.png",
+      "sizes": "16x16",
+      "type": "image/png"
     },
     {
-      "src": "images/logo192.png",
-      "type": "image/png",
-      "sizes": "192x192"
+      "src": "images/Pokerpal_logo32.png",
+      "sizes": "32x32",
+      "type": "image/png"
     },
     {
-      "src": "images/logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "images/Pokerpal_logo192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/Pokerpal_logo512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ],
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#0d1923",
-  "background_color": "#0d1923"
+  "background_color": "#ffffff"
 }

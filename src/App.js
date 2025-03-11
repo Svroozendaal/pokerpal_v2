@@ -10,9 +10,12 @@ import ResultsDialog from './components/ResultsDialog';
 import { darkTheme, lightTheme } from './theme';
 import ResultsDisplay from './components/ResultsDisplay';
 import ThemeToggle from './components/ThemeToggle';
-
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { AuthProvider } from './contexts/AuthContext';
+import Login from './components/Login';
+import Signup from './components/Signup';
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -106,120 +109,133 @@ function App() {
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
       <CssBaseline />
-      <ThemeToggle isDarkMode={isDarkMode} toggleTheme={() => setIsDarkMode(!isDarkMode)} />
-      <AppContainer>
-        <Grid container direction="column" spacing={4}>
-          <Grid item>
-            <Typography 
-              variant="h4" 
-              align="center" 
-              gutterBottom
-              sx={{
-                mb: 1,
-                background: 'linear-gradient(45deg, #1f957d 30%, #2ab094 90%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-                fontWeight: 700,
-              }}
-            >
-              PokerPal
-            </Typography>
-            <Typography 
-              variant="subtitle1" 
-              align="center" 
-              gutterBottom
-              sx={{
-                maxWidth: '600px',
-                mx: 'auto',
-                opacity: 0.9,
-              }}
-            >
-              Enter player details, coin value, and starting/ending stacks to calculate payouts.
-            </Typography>
-          </Grid>
+      <Router>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route
+              path="/*"
+              element={
+                <AppContainer>
+                  <ThemeToggle isDarkMode={isDarkMode} toggleTheme={() => setIsDarkMode(!isDarkMode)} />
+                  <Grid container direction="column" spacing={4}>
+                    <Grid item>
+                      <Typography 
+                        variant="h4" 
+                        align="center" 
+                        gutterBottom
+                        sx={{
+                          mb: 1,
+                          background: 'linear-gradient(45deg, #1f957d 30%, #2ab094 90%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          textShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+                          fontWeight: 700,
+                        }}
+                      >
+                        PokerPal
+                      </Typography>
+                      <Typography 
+                        variant="subtitle1" 
+                        align="center" 
+                        gutterBottom
+                        sx={{
+                          maxWidth: '600px',
+                          mx: 'auto',
+                          opacity: 0.9,
+                        }}
+                      >
+                        Enter player details, coin value, and starting/ending stacks to calculate payouts.
+                      </Typography>
+                    </Grid>
 
-          <Grid item>
-            <Grid container spacing={4}>
-              {/* Setup Section */}
-              <Grid item xs={12} md={4}>
-                <Box sx={{ 
-                  position: { md: 'sticky' },
-                  top: { md: 24 },
-                  height: 'fit-content',
-                  zIndex: 1
-                }}>
-                  <SetupInputs
-                    coinValue={coinValue}
-                    setCoinValue={setCoinValue}
-                    buyInValue={buyInValue}
-                    setBuyInValue={setBuyInValue}
-                    totalStartingStack={totalStartingStack}
-                    totalEndingStack={totalEndingStack}
-                    calculatePayouts={calculatePayouts}
-                    selectedCurrency={selectedCurrency}
-                    onCurrencyChange={handleCurrencyChange}
-                  />
-                </Box>
-              </Grid>
+                    <Grid item>
+                      <Grid container spacing={4}>
+                        {/* Setup Section */}
+                        <Grid item xs={12} md={4}>
+                          <Box sx={{ 
+                            position: { md: 'sticky' },
+                            top: { md: 24 },
+                            height: 'fit-content',
+                            zIndex: 1
+                          }}>
+                            <SetupInputs
+                              coinValue={coinValue}
+                              setCoinValue={setCoinValue}
+                              buyInValue={buyInValue}
+                              setBuyInValue={setBuyInValue}
+                              totalStartingStack={totalStartingStack}
+                              totalEndingStack={totalEndingStack}
+                              calculatePayouts={calculatePayouts}
+                              selectedCurrency={selectedCurrency}
+                              onCurrencyChange={handleCurrencyChange}
+                            />
+                          </Box>
+                        </Grid>
 
-              {/* Players Section */}
-              <Grid item xs={12} md={8}>
-                <Box>
-                  {players.map((player, index) => (
-                    <PlayerInput
-                      key={index}
-                      player={player}
-                      index={index}
-                      handlePlayerChange={handlePlayerChange}
-                      removePlayer={() => setPlayers(players.filter((_, i) => i !== index))}
-                      buyInValue={buyInValue}
+                        {/* Players Section */}
+                        <Grid item xs={12} md={8}>
+                          <Box>
+                            {players.map((player, index) => (
+                              <PlayerInput
+                                key={index}
+                                player={player}
+                                index={index}
+                                handlePlayerChange={handlePlayerChange}
+                                removePlayer={() => setPlayers(players.filter((_, i) => i !== index))}
+                                buyInValue={buyInValue}
+                              />
+                            ))}
+                            <Button 
+                              variant="contained" 
+                              color="primary" 
+                              onClick={addPlayer} 
+                              fullWidth
+                              sx={{ 
+                                mt: 1,
+                                mb: 2
+                              }}
+                            >
+                              Add Player
+                            </Button>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+
+                    {/* Results Section */}
+                    {results.playerResults && results.playerResults.length > 0 && (
+                      <Grid item>
+                        <ResultsDisplay 
+                          results={results} 
+                          potValue={potValue} 
+                          currency={selectedCurrency}
+                        />
+                      </Grid>
+                    )}
+
+                    <DiscrepancyModal
+                      open={showDiscrepancyModal}
+                      onClose={() => setShowDiscrepancyModal(false)}
+                      discrepancy={discrepancy}
+                      currency={selectedCurrency}
                     />
-                  ))}
-                  <Button 
-                    variant="contained" 
-                    color="primary" 
-                    onClick={addPlayer} 
-                    fullWidth
-                    sx={{ 
-                      mt: 1,
-                      mb: 2
-                    }}
-                  >
-                    Add Player
-                  </Button>
-                </Box>
-              </Grid>
-            </Grid>
-          </Grid>
 
-          {/* Results Section */}
-          {results.playerResults && results.playerResults.length > 0 && (
-            <Grid item>
-              <ResultsDisplay 
-                results={results} 
-                potValue={potValue} 
-                currency={selectedCurrency}
-              />
-            </Grid>
-          )}
-
-          <DiscrepancyModal
-            open={showDiscrepancyModal}
-            onClose={() => setShowDiscrepancyModal(false)}
-            discrepancy={discrepancy}
-            currency={selectedCurrency}
-          />
-
-          <ResultsDialog
-            open={showResultsDialog}
-            onClose={() => setShowResultsDialog(false)}
-            results={results}
-            potValue={potValue}
-            currency={selectedCurrency}
-          />
-        </Grid>
-      </AppContainer>
+                    <ResultsDialog
+                      open={showResultsDialog}
+                      onClose={() => setShowResultsDialog(false)}
+                      results={results}
+                      potValue={potValue}
+                      currency={selectedCurrency}
+                    />
+                  </Grid>
+                </AppContainer>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </Router>
     </ThemeProvider>
   );
 }

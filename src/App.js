@@ -10,17 +10,120 @@ import ResultsDialog from './components/ResultsDialog';
 import { darkTheme, lightTheme } from './theme';
 import ResultsDisplay from './components/ResultsDisplay';
 import ThemeToggle from './components/ThemeToggle';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import Login from './components/Login';
 import Signup from './components/Signup';
-import MainApp from './components/MainApp'; // We'll create this to wrap your existing app content
 
-function PrivateRoute({ children }) {
-  const { currentUser } = useAuth();
-  return currentUser ? children : <Navigate to="/login" />;
+function MainContent({ isDarkMode, setIsDarkMode, ...props }) {
+  return (
+    <>
+      <ThemeToggle isDarkMode={isDarkMode} toggleTheme={() => setIsDarkMode(!isDarkMode)} />
+      <Grid container direction="column" spacing={4}>
+        <Grid item>
+          <Typography 
+            variant="h4" 
+            align="center" 
+            gutterBottom
+            sx={{
+              mb: 1,
+              background: 'linear-gradient(45deg, #1f957d 30%, #2ab094 90%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              textShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+              fontWeight: 700,
+            }}
+          >
+            PokerPal
+          </Typography>
+          <Typography 
+            variant="subtitle1" 
+            align="center" 
+            gutterBottom
+            sx={{
+              maxWidth: '600px',
+              mx: 'auto',
+              opacity: 0.9,
+            }}
+          >
+            Enter player details, coin value, and starting/ending stacks to calculate payouts.
+          </Typography>
+        </Grid>
+
+        <Grid item>
+          <Grid container spacing={4}>
+            {/* Setup Section */}
+            <Grid item xs={12} md={4}>
+              <Box sx={{ 
+                position: { md: 'sticky' },
+                top: { md: 24 },
+                height: 'fit-content',
+                zIndex: 1
+              }}>
+                <SetupInputs {...props} />
+              </Box>
+            </Grid>
+
+            {/* Players Section */}
+            <Grid item xs={12} md={8}>
+              <Box>
+                {props.players.map((player, index) => (
+                  <PlayerInput
+                    key={index}
+                    player={player}
+                    index={index}
+                    handlePlayerChange={props.handlePlayerChange}
+                    removePlayer={() => props.setPlayers(props.players.filter((_, i) => i !== index))}
+                    buyInValue={props.buyInValue}
+                  />
+                ))}
+                <Button 
+                  variant="contained" 
+                  color="primary" 
+                  onClick={props.addPlayer} 
+                  fullWidth
+                  sx={{ 
+                    mt: 1,
+                    mb: 2
+                  }}
+                >
+                  Add Player
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Grid>
+
+        {/* Results Section */}
+        {props.results.playerResults && props.results.playerResults.length > 0 && (
+          <Grid item>
+            <ResultsDisplay 
+              results={props.results} 
+              potValue={props.potValue} 
+              currency={props.selectedCurrency}
+            />
+          </Grid>
+        )}
+      </Grid>
+
+      <DiscrepancyModal
+        open={props.showDiscrepancyModal}
+        onClose={() => props.setShowDiscrepancyModal(false)}
+        discrepancy={props.discrepancy}
+        currency={props.selectedCurrency}
+      />
+
+      <ResultsDialog
+        open={props.showResultsDialog}
+        onClose={() => props.setShowResultsDialog(false)}
+        results={props.results}
+        potValue={props.potValue}
+        currency={props.selectedCurrency}
+      />
+    </>
+  );
 }
 
 function App() {
@@ -40,7 +143,6 @@ function App() {
   const [totalEndingStack, setTotalEndingStack] = useState(0);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState({ code: 'EUR', symbol: '€', name: 'Euro' });
-  
 
   useEffect(() => {
     const totalStarting = players.reduce((acc, player) => acc + (parseFloat(player.startStack) || 0), 0);
@@ -111,24 +213,46 @@ function App() {
     setSelectedCurrency(newCurrency);
   };
 
-// -------------- Styling below -------------
+  const mainProps = {
+    players,
+    setPlayers,
+    coinValue,
+    setCoinValue,
+    buyInValue,
+    setBuyInValue,
+    results,
+    potValue,
+    selectedCurrency,
+    showDiscrepancyModal,
+    setShowDiscrepancyModal,
+    discrepancy,
+    showResultsDialog,
+    setShowResultsDialog,
+    handlePlayerChange,
+    addPlayer,
+    calculatePayouts,
+    handleCurrencyChange,
+    totalStartingStack,
+    totalEndingStack
+  };
+
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
       <CssBaseline />
-      <ThemeToggle isDarkMode={isDarkMode} toggleTheme={() => setIsDarkMode(!isDarkMode)} />
       <Router>
         <AuthProvider>
           <Routes>
+            <Route path="/" element={
+              <AppContainer>
+                <MainContent 
+                  isDarkMode={isDarkMode} 
+                  setIsDarkMode={setIsDarkMode}
+                  {...mainProps}
+                />
+              </AppContainer>
+            } />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route
-              path="/*"
-              element={
-                <PrivateRoute>
-                  <MainApp />
-                </PrivateRoute>
-              }
-            />
           </Routes>
         </AuthProvider>
       </Router>

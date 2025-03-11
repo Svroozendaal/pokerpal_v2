@@ -1,19 +1,64 @@
 import React from 'react';
-import { IconButton, Tooltip } from '@mui/material';
+import { Box, IconButton, Button } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import LogoutIcon from '@mui/icons-material/Logout';
+import LoginIcon from '@mui/icons-material/Login';
 
-function ThemeToggle({ isDarkMode, toggleTheme }) {
+export default function ThemeToggle({ isDarkMode, toggleTheme }) {
+  const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to log out:', error);
+    }
+  };
+
   return (
-    <Tooltip title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}>
-      <IconButton
-        onClick={toggleTheme}
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        position: 'fixed',
+        top: 16,
+        right: 16,
+        zIndex: 1001,
+      }}
+    >
+      {currentUser ? (
+        <Button
+          variant="outlined"
+          color="inherit"
+          onClick={handleLogout}
+          startIcon={<LogoutIcon />}
+          size="small"
+          sx={{ backgroundColor: 'background.paper' }}
+        >
+          Logout
+        </Button>
+      ) : (
+        <Button
+          variant="outlined"
+          color="inherit"
+          onClick={() => navigate('/login')}
+          startIcon={<LoginIcon />}
+          size="small"
+          sx={{ backgroundColor: 'background.paper' }}
+        >
+          Login
+        </Button>
+      )}
+      <IconButton 
+        onClick={toggleTheme} 
         color="inherit"
         sx={{
-          position: 'fixed',
-          top: 16,
-          right: 16,
-          zIndex: 1001,
           backgroundColor: 'background.paper',
           '&:hover': {
             backgroundColor: 'action.hover',
@@ -22,8 +67,6 @@ function ThemeToggle({ isDarkMode, toggleTheme }) {
       >
         {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
       </IconButton>
-    </Tooltip>
+    </Box>
   );
-}
-
-export default ThemeToggle; 
+} 

@@ -10,6 +10,7 @@ import {
   Box,
   CircularProgress,
   Grid,
+  Divider,
 } from '@mui/material';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
@@ -57,8 +58,8 @@ export default function SaveGameDialog({
           buyInValue,
           players: players.map(player => ({
             name: player.name,
-            startStack: player.startStack,
-            endStack: player.endStack
+            startStack: player.startStack || '0',  // Default to '0' if empty
+            endStack: player.endStack || '0'       // Default to '0' if empty
           }))
         }
       };
@@ -77,7 +78,7 @@ export default function SaveGameDialog({
     <Dialog 
       open={open} 
       onClose={() => handleClose(false)} 
-      maxWidth="sm" 
+      maxWidth="md" 
       fullWidth
       disableEscapeKeyDown={saving}
       disableBackdropClick={saving}
@@ -92,66 +93,82 @@ export default function SaveGameDialog({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g., Friday Night Game"
-            sx={{ mb: 2 }}
+            sx={{ mb: 3 }}
             disabled={saving}
           />
           
-          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            Game Summary:
-          </Typography>
+          <Grid container spacing={4}>
+            {/* Left Column - Game Summary */}
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
+                Game Summary
+              </Typography>
+              
+              <Grid container spacing={1}>
+                <Grid item xs={6}>
+                  <Typography variant="body2" color="text.secondary">
+                    Total Pot:
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="body2" align="right">
+                    {currency.symbol}{potValue.toFixed(2)}
+                  </Typography>
+                </Grid>
+                
+                <Grid item xs={6}>
+                  <Typography variant="body2" color="text.secondary">
+                    Coin Value:
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="body2" align="right">
+                    {currency.symbol}{coinValue}
+                  </Typography>
+                </Grid>
+                
+                <Grid item xs={6}>
+                  <Typography variant="body2" color="text.secondary">
+                    Buy-in Value:
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="body2" align="right">
+                    {buyInValue} chips
+                  </Typography>
+                </Grid>
+              </Grid>
+            </Grid>
 
-          {/* Game Settings */}
-          <Grid container spacing={1} sx={{ mb: 2 }}>
-            <Grid item xs={6}>
-              <Typography variant="body2" color="text.secondary">
-                Total Pot:
-              </Typography>
+            {/* Vertical Divider for MD screens and up */}
+            <Grid item md={0} sx={{ display: { xs: 'none', md: 'block' } }}>
+              <Divider orientation="vertical" />
             </Grid>
-            <Grid item xs={6}>
-              <Typography variant="body2" align="right">
-                {currency.symbol}{potValue.toFixed(2)}
-              </Typography>
+
+            {/* Horizontal Divider for XS screens */}
+            <Grid item xs={12} sx={{ display: { xs: 'block', md: 'none' } }}>
+              <Divider sx={{ my: 2 }} />
             </Grid>
-            
-            <Grid item xs={6}>
-              <Typography variant="body2" color="text.secondary">
-                Coin Value:
+
+            {/* Right Column - Player Results */}
+            <Grid item xs={12} md={5}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
+                Player Results
               </Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <Typography variant="body2" align="right">
-                {currency.symbol}{coinValue}
-              </Typography>
-            </Grid>
-            
-            <Grid item xs={6}>
-              <Typography variant="body2" color="text.secondary">
-                Buy-in Value:
-              </Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <Typography variant="body2" align="right">
-                {buyInValue} chips
-              </Typography>
+              <Box>
+                {results.playerResults.map((player, index) => (
+                  <Typography 
+                    key={index} 
+                    variant="body2" 
+                    color={player.result > 0 ? 'success.main' : player.result < 0 ? 'error.main' : 'text.primary'}
+                    sx={{ mb: 0.5 }}
+                  >
+                    {player.name}: {player.result > 0 ? '+' : ''}{currency.symbol}{player.result.toFixed(2)}
+                  </Typography>
+                ))}
+              </Box>
             </Grid>
           </Grid>
-
-          {/* Player Results */}
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-              Player Results:
-            </Typography>
-            {results.playerResults.map((player, index) => (
-              <Typography 
-                key={index} 
-                variant="body2" 
-                color={player.result > 0 ? 'success.main' : player.result < 0 ? 'error.main' : 'text.primary'}
-                sx={{ mb: 0.5 }}
-              >
-                {player.name}: {player.result > 0 ? '+' : ''}{currency.symbol}{player.result.toFixed(2)}
-              </Typography>
-            ))}
-          </Box>
         </Box>
       </DialogContent>
       <DialogActions>

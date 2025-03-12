@@ -133,6 +133,8 @@ export default function Navigation({ isDarkMode, toggleTheme }) {
 
         <Typography
           variant="h6"
+          component="div"
+          onClick={() => navigate('/')}
           sx={{
             position: 'absolute',
             left: '50%',
@@ -142,6 +144,10 @@ export default function Navigation({ isDarkMode, toggleTheme }) {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             fontWeight: 700,
+            cursor: 'pointer',
+            '&:hover': {
+              opacity: 0.8,
+            },
           }}
         >
           PokerPal

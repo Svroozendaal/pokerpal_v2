@@ -137,6 +137,9 @@ function MainContent({ isDarkMode, setIsDarkMode, ...props }) {
         results={props.results}
         potValue={props.potValue}
         currency={props.selectedCurrency}
+        coinValue={props.coinValue}
+        buyInValue={props.buyInValue}
+        players={props.players}
       />
     </>
   );

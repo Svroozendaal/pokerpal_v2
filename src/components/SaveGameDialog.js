@@ -12,7 +12,16 @@ import {
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 
-export default function SaveGameDialog({ open, onClose, results, potValue, currency }) {
+export default function SaveGameDialog({ 
+  open, 
+  onClose, 
+  results, 
+  potValue, 
+  currency,
+  coinValue,
+  buyInValue,
+  players
+}) {
   const [title, setTitle] = useState('');
   const [saving, setSaving] = useState(false);
   const { currentUser } = useAuth();
@@ -31,6 +40,15 @@ export default function SaveGameDialog({ open, onClose, results, potValue, curre
         currency,
         results: results.playerResults,
         payouts: results.payouts,
+        settings: {
+          coinValue,
+          buyInValue,
+          players: players.map(player => ({
+            name: player.name,
+            startStack: player.startStack,
+            endStack: player.endStack
+          }))
+        }
       };
 
       await addDoc(collection(db, 'games'), gameData);
@@ -63,6 +81,12 @@ export default function SaveGameDialog({ open, onClose, results, potValue, curre
           </Typography>
           <Typography variant="body2" gutterBottom>
             Total Pot: {currency.symbol}{potValue.toFixed(2)}
+          </Typography>
+          <Typography variant="body2" gutterBottom>
+            Coin Value: {currency.symbol}{coinValue}
+          </Typography>
+          <Typography variant="body2" gutterBottom>
+            Buy-in Value: {buyInValue} chips
           </Typography>
           {results.playerResults.map((player, index) => (
             <Typography key={index} variant="body2" color={player.result > 0 ? 'success.main' : player.result < 0 ? 'error.main' : 'text.primary'}>

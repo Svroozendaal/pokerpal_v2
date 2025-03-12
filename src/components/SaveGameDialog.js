@@ -8,6 +8,7 @@ import {
   TextField,
   Typography,
   Box,
+  CircularProgress,
 } from '@mui/material';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
@@ -27,8 +28,15 @@ export default function SaveGameDialog({
   const { currentUser } = useAuth();
   const db = getFirestore();
 
+  const handleClose = (saved = false) => {
+    if (!saving) {
+      setTitle('');
+      onClose(saved);
+    }
+  };
+
   const handleSave = async () => {
-    if (!title.trim()) return;
+    if (!title.trim() || saving) return;
     
     setSaving(true);
     try {
@@ -52,8 +60,7 @@ export default function SaveGameDialog({
       };
 
       await addDoc(collection(db, 'games'), gameData);
-      setTitle('');
-      onClose(true); // true indicates successful save
+      handleClose(true);
     } catch (error) {
       console.error('Error saving game:', error);
     } finally {
@@ -62,7 +69,14 @@ export default function SaveGameDialog({
   };
 
   return (
-    <Dialog open={open} onClose={() => onClose(false)} maxWidth="sm" fullWidth>
+    <Dialog 
+      open={open} 
+      onClose={() => handleClose(false)} 
+      maxWidth="sm" 
+      fullWidth
+      disableEscapeKeyDown={saving}
+      disableBackdropClick={saving}
+    >
       <DialogTitle>Save Game Results</DialogTitle>
       <DialogContent>
         <Box sx={{ mb: 3, mt: 1 }}>
@@ -74,6 +88,7 @@ export default function SaveGameDialog({
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g., Friday Night Game"
             sx={{ mb: 2 }}
+            disabled={saving}
           />
           
           <Typography variant="subtitle2" color="text.secondary" gutterBottom>
@@ -96,11 +111,17 @@ export default function SaveGameDialog({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => onClose(false)}>Cancel</Button>
+        <Button 
+          onClick={() => handleClose(false)}
+          disabled={saving}
+        >
+          Cancel
+        </Button>
         <Button 
           onClick={handleSave} 
           variant="contained" 
           disabled={!title.trim() || saving}
+          startIcon={saving && <CircularProgress size={20} color="inherit" />}
         >
           {saving ? 'Saving...' : 'Save Game'}
         </Button>

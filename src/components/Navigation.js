@@ -41,6 +41,7 @@ export default function Navigation({ isDarkMode, toggleTheme }) {
         backdropFilter: 'blur(8px)',
         height: '48px',
         borderBottom: `1px solid ${theme.palette.divider}`,
+        zIndex: 9999,
       }}
     >
       <Toolbar 

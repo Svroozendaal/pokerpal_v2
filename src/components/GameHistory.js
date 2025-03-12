@@ -17,18 +17,31 @@ import {
 } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import ResultsDialog from './ResultsDialog';
 
-function GameRow({ game }) {
+function GameRow({ game, onGameClick }) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <TableRow>
+      <TableRow 
+        hover
+        onClick={() => onGameClick(game)}
+        sx={{ 
+          cursor: 'pointer',
+          '&:hover': {
+            backgroundColor: 'action.hover',
+          }
+        }}
+      >
         <TableCell>
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => setOpen(!open)}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent row click when clicking expand button
+              setOpen(!open);
+            }}
           >
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
@@ -91,6 +104,7 @@ function GameRow({ game }) {
 
 export default function GameHistory() {
   const [games, setGames] = useState([]);
+  const [selectedGame, setSelectedGame] = useState(null);
   const { currentUser } = useAuth();
 
   useEffect(() => {
@@ -113,6 +127,10 @@ export default function GameHistory() {
     fetchGames();
   }, [currentUser]);
 
+  const handleGameClick = (game) => {
+    setSelectedGame(game);
+  };
+
   if (!currentUser) return null;
 
   return (
@@ -133,11 +151,26 @@ export default function GameHistory() {
           </TableHead>
           <TableBody>
             {games.map((game) => (
-              <GameRow key={game.id} game={game} />
+              <GameRow 
+                key={game.id} 
+                game={game} 
+                onGameClick={handleGameClick}
+              />
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+
+      <ResultsDialog
+        open={selectedGame !== null}
+        onClose={() => setSelectedGame(null)}
+        results={{
+          playerResults: selectedGame?.results || [],
+          payouts: selectedGame?.payouts || [],
+        }}
+        potValue={selectedGame?.potValue || 0}
+        currency={selectedGame?.currency || { symbol: '€', code: 'EUR' }}
+      />
     </Box>
   );
 } 

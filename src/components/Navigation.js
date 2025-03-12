@@ -71,8 +71,8 @@ export default function Navigation({ isDarkMode, toggleTheme }) {
             }}
           >
             <img 
-              src="/images/Pokerpal_logo32.png" 
-              alt="PokerPal Logo" 
+              src="/images/Pokerpal_logo512.png" 
+              alt="Logo" 
               style={{ 
                 height: '24px',
                 width: 'auto',
@@ -136,6 +136,7 @@ export default function Navigation({ isDarkMode, toggleTheme }) {
           sx={{
             position: 'absolute',
             left: '50%',
+            fontSize: '2rem',
             transform: 'translateX(-50%)',
             background: 'linear-gradient(45deg, #1f957d 30%, #2ab094 90%)',
             WebkitBackgroundClip: 'text',

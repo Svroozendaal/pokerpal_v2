@@ -13,11 +13,16 @@ import Navigation from './components/Navigation';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
 import Signup from './components/Signup';
+import SaveGameDialog from './components/SaveGameDialog';
+import GameHistory from './components/GameHistory';
+import Account from './components/Account';
 
 function MainContent({ isDarkMode, setIsDarkMode, ...props }) {
+  const { currentUser } = useAuth();
+  
   return (
     <>
       <Box sx={{ mt: 7 }}> {/* Reduced margin top for smaller navbar */}
@@ -84,11 +89,23 @@ function MainContent({ isDarkMode, setIsDarkMode, ...props }) {
           {/* Results Section */}
           {props.results.playerResults && props.results.playerResults.length > 0 && (
             <Grid item>
-              <ResultsDisplay 
-                results={props.results} 
-                potValue={props.potValue} 
-                currency={props.selectedCurrency}
-              />
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <ResultsDisplay 
+                  results={props.results} 
+                  potValue={props.potValue} 
+                  currency={props.selectedCurrency}
+                />
+                {currentUser && (
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => props.setShowSaveDialog(true)}
+                    sx={{ alignSelf: 'center', mt: 2 }}
+                  >
+                    Save This Game
+                  </Button>
+                )}
+              </Box>
             </Grid>
           )}
         </Grid>
@@ -104,6 +121,19 @@ function MainContent({ isDarkMode, setIsDarkMode, ...props }) {
       <ResultsDialog
         open={props.showResultsDialog}
         onClose={() => props.setShowResultsDialog(false)}
+        results={props.results}
+        potValue={props.potValue}
+        currency={props.selectedCurrency}
+      />
+
+      <SaveGameDialog
+        open={props.showSaveDialog}
+        onClose={(saved) => {
+          props.setShowSaveDialog(false);
+          if (saved) {
+            // Optionally show a success message or redirect to history
+          }
+        }}
         results={props.results}
         potValue={props.potValue}
         currency={props.selectedCurrency}
@@ -129,6 +159,7 @@ function App() {
   const [totalEndingStack, setTotalEndingStack] = useState(0);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState({ code: 'EUR', symbol: '€', name: 'Euro' });
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
 
   useEffect(() => {
     const totalStarting = players.reduce((acc, player) => acc + (parseFloat(player.startStack) || 0), 0);
@@ -219,7 +250,9 @@ function App() {
     calculatePayouts,
     handleCurrencyChange,
     totalStartingStack,
-    totalEndingStack
+    totalEndingStack,
+    showSaveDialog,
+    setShowSaveDialog,
   };
 
   return (
@@ -239,7 +272,8 @@ function App() {
               </AppContainer>
             } />
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+            <Route path="/history" element={<GameHistory />} />
+            <Route path="/account" element={<Account />} />
           </Routes>
         </AuthProvider>
       </Router>

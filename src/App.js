@@ -20,24 +20,9 @@ import Signup from './components/Signup';
 function MainContent({ isDarkMode, setIsDarkMode, ...props }) {
   return (
     <>
-      <Box sx={{ mt: 8 }}> {/* Add margin top to account for fixed AppBar */}
+      <Box sx={{ mt: 7 }}> {/* Reduced margin top for smaller navbar */}
         <Grid container direction="column" spacing={4}>
           <Grid item>
-            <Typography 
-              variant="h4" 
-              align="center" 
-              gutterBottom
-              sx={{
-                mb: 1,
-                background: 'linear-gradient(45deg, #1f957d 30%, #2ab094 90%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-                fontWeight: 700,
-              }}
-            >
-              PokerPal
-            </Typography>
             <Typography 
               variant="subtitle1" 
               align="center" 

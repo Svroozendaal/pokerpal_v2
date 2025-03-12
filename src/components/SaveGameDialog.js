@@ -9,9 +9,13 @@ import {
   Typography,
   Box,
   CircularProgress,
+  Grid,
 } from '@mui/material';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+
+// Initialize Firestore outside the component to avoid re-initialization
+const db = getFirestore();
 
 export default function SaveGameDialog({ 
   open, 
@@ -26,7 +30,6 @@ export default function SaveGameDialog({
   const [title, setTitle] = useState('');
   const [saving, setSaving] = useState(false);
   const { currentUser } = useAuth();
-  const db = getFirestore();
 
   const handleClose = (saved = false) => {
     if (!saving) {
@@ -40,6 +43,7 @@ export default function SaveGameDialog({
     
     setSaving(true);
     try {
+      // Prepare the data before the async operation
       const gameData = {
         title: title.trim(),
         date: new Date(),
@@ -59,6 +63,7 @@ export default function SaveGameDialog({
         }
       };
 
+      // Single async operation
       await addDoc(collection(db, 'games'), gameData);
       handleClose(true);
     } catch (error) {
@@ -94,20 +99,59 @@ export default function SaveGameDialog({
           <Typography variant="subtitle2" color="text.secondary" gutterBottom>
             Game Summary:
           </Typography>
-          <Typography variant="body2" gutterBottom>
-            Total Pot: {currency.symbol}{potValue.toFixed(2)}
-          </Typography>
-          <Typography variant="body2" gutterBottom>
-            Coin Value: {currency.symbol}{coinValue}
-          </Typography>
-          <Typography variant="body2" gutterBottom>
-            Buy-in Value: {buyInValue} chips
-          </Typography>
-          {results.playerResults.map((player, index) => (
-            <Typography key={index} variant="body2" color={player.result > 0 ? 'success.main' : player.result < 0 ? 'error.main' : 'text.primary'}>
-              {player.name}: {player.result > 0 ? '+' : ''}{currency.symbol}{player.result.toFixed(2)}
+
+          {/* Game Settings */}
+          <Grid container spacing={1} sx={{ mb: 2 }}>
+            <Grid item xs={6}>
+              <Typography variant="body2" color="text.secondary">
+                Total Pot:
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography variant="body2" align="right">
+                {currency.symbol}{potValue.toFixed(2)}
+              </Typography>
+            </Grid>
+            
+            <Grid item xs={6}>
+              <Typography variant="body2" color="text.secondary">
+                Coin Value:
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography variant="body2" align="right">
+                {currency.symbol}{coinValue}
+              </Typography>
+            </Grid>
+            
+            <Grid item xs={6}>
+              <Typography variant="body2" color="text.secondary">
+                Buy-in Value:
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography variant="body2" align="right">
+                {buyInValue} chips
+              </Typography>
+            </Grid>
+          </Grid>
+
+          {/* Player Results */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              Player Results:
             </Typography>
-          ))}
+            {results.playerResults.map((player, index) => (
+              <Typography 
+                key={index} 
+                variant="body2" 
+                color={player.result > 0 ? 'success.main' : player.result < 0 ? 'error.main' : 'text.primary'}
+                sx={{ mb: 0.5 }}
+              >
+                {player.name}: {player.result > 0 ? '+' : ''}{currency.symbol}{player.result.toFixed(2)}
+              </Typography>
+            ))}
+          </Box>
         </Box>
       </DialogContent>
       <DialogActions>

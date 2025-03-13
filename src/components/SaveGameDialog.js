@@ -14,7 +14,7 @@ import {
   Snackbar,
   Alert,
 } from '@mui/material';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 
@@ -66,40 +66,56 @@ export default function SaveGameDialog({
     setError(null);
     
     try {
+      console.log('Starting save operation...');
+      
       // Prepare the data before the async operation
       const gameData = {
         title: title.trim(),
-        date: new Date(),
+        date: serverTimestamp(), // Use server timestamp instead of client date
         userId: currentUser.uid,
-        potValue,
+        potValue: Number(potValue), // Ensure number type
         currency,
-        results: results.playerResults,
+        results: results.playerResults.map(player => ({
+          ...player,
+          result: Number(player.result) // Ensure number type
+        })),
         payouts: results.payouts,
         settings: {
-          coinValue,
-          buyInValue,
+          coinValue: Number(coinValue), // Ensure number type
+          buyInValue: Number(buyInValue), // Ensure number type
           players: players.map(player => ({
             name: player.name || 'Anonymous',
-            startStack: player.startStack || '0',
-            endStack: player.endStack || '0'
+            startStack: Number(player.startStack) || 0,
+            endStack: Number(player.endStack) || 0
           }))
         }
       };
 
-      // Single async operation with timeout
+      console.log('Data prepared:', gameData);
+
+      // Single async operation with increased timeout
       const savePromise = addDoc(collection(db, 'games'), gameData);
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Save operation timed out')), 10000)
+        setTimeout(() => reject(new Error('Save operation timed out')), 30000) // Increased timeout to 30 seconds
       );
 
-      await Promise.race([savePromise, timeoutPromise]);
+      console.log('Starting Firestore operation...');
+      const docRef = await Promise.race([savePromise, timeoutPromise]);
+      console.log('Save successful, document ID:', docRef.id);
+      
       setSuccess(true);
       handleClose(true);
     } catch (error) {
       console.error('Error saving game:', error);
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        stack: error.stack
+      });
+      
       setError(error.message === 'Save operation timed out' 
         ? 'Save operation took too long. Please try again.'
-        : 'Failed to save game. Please try again.');
+        : `Failed to save game: ${error.message}`);
     } finally {
       setSaving(false);
     }

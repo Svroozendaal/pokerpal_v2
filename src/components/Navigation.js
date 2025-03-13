@@ -16,12 +16,15 @@ import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
 export default function Navigation({ isDarkMode, toggleTheme }) {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
   const [isHovered, setIsHovered] = useState(false);
+
+  const isAdmin = currentUser?.email === 'dlcsblackops123@gmail.com'; // Replace with your admin email
 
   const handleLogout = async () => {
     try {
@@ -110,6 +113,16 @@ export default function Navigation({ isDarkMode, toggleTheme }) {
                 >
                   History
                 </Button>
+                {isAdmin && (
+                  <Button
+                    color="inherit"
+                    size="small"
+                    startIcon={<AdminPanelSettingsIcon />}
+                    onClick={() => navigate('/admin')}
+                  >
+                    Admin
+                  </Button>
+                )}
                 <Button
                   color="inherit"
                   size="small"

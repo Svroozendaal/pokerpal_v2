@@ -20,6 +20,8 @@ import SaveGameDialog from './components/SaveGameDialog';
 import GameHistory from './components/GameHistory';
 import Account from './components/Account';
 import GameView from './components/GameView';
+import Admin from './components/Admin';
+import Terms from './components/Terms';
 
 function MainContent({ isDarkMode, setIsDarkMode, ...props }) {
   const { currentUser } = useAuth();
@@ -276,9 +278,12 @@ function App() {
               </AppContainer>
             } />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/terms" element={<Terms />} />
             <Route path="/history" element={<GameHistory />} />
             <Route path="/account" element={<Account />} />
             <Route path="/game/:gameId" element={<GameView />} />
+            <Route path="/admin" element={<Admin />} />
           </Routes>
         </AuthProvider>
       </Router>

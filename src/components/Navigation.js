@@ -89,7 +89,7 @@ export default function Navigation({ isDarkMode, toggleTheme }) {
           <img
             src="/images/Pokerpla_logo512.png"
             alt="PokerPal Logo"
-            style={{ height: '100%', marginRight: '8px' }}
+            style={{ height: '44px', marginRight: '8px' }}
           />
           <Typography
             variant="h6"
@@ -99,6 +99,7 @@ export default function Navigation({ isDarkMode, toggleTheme }) {
               fontSize: { xs: '1.2rem', sm: '1.5rem' },
             }}
           >
+             
           </Typography>
         </Box>
 

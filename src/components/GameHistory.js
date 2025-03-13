@@ -14,19 +14,30 @@ import {
   TableRow,
   Collapse,
   IconButton,
+  Link,
+  Tooltip,
 } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import ShareIcon from '@mui/icons-material/Share';
+import { useNavigate } from 'react-router-dom';
 import ResultsDialog from './ResultsDialog';
 
 function GameRow({ game, onGameClick }) {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleRowClick = (e) => {
+    // Don't navigate if clicking the expand button
+    if (e.target.closest('button')) return;
+    navigate(`/game/${game.id}`);
+  };
 
   return (
     <>
       <TableRow 
         hover
-        onClick={() => onGameClick(game)}
+        onClick={handleRowClick}
         sx={{ 
           cursor: 'pointer',
           '&:hover': {
@@ -46,7 +57,23 @@ function GameRow({ game, onGameClick }) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell>{game.title}</TableCell>
+        <TableCell>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {game.title}
+            <Tooltip title="Share game">
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(`${window.location.origin}/game/${game.id}`);
+                  // You could add a snackbar notification here
+                }}
+              >
+                <ShareIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </TableCell>
         <TableCell>{game.date.toLocaleDateString()}</TableCell>
         <TableCell>{game.currency.symbol}{game.potValue.toFixed(2)}</TableCell>
         <TableCell>
@@ -127,10 +154,6 @@ export default function GameHistory() {
     fetchGames();
   }, [currentUser]);
 
-  const handleGameClick = (game) => {
-    setSelectedGame(game);
-  };
-
   if (!currentUser) return null;
 
   return (
@@ -154,7 +177,7 @@ export default function GameHistory() {
               <GameRow 
                 key={game.id} 
                 game={game} 
-                onGameClick={handleGameClick}
+                onGameClick={setSelectedGame}
               />
             ))}
           </TableBody>

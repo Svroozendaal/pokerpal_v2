@@ -52,22 +52,23 @@ export default function GameHistory() {
         const gamesRef = collection(db, 'games');
         const q = query(
           gamesRef,
-          where('userId', '==', currentUser.uid),
-          orderBy('date', 'desc')
+          where('userId', '==', currentUser.uid)
         );
         
         const querySnapshot = await getDocs(q);
         console.log('Query snapshot:', querySnapshot.size, 'games found');
         
-        const gamesData = querySnapshot.docs.map(doc => {
-          const data = doc.data();
-          console.log('Game data:', { id: doc.id, title: data.title });
-          return {
-            id: doc.id,
-            ...data,
-            date: data.date.toDate()
-          };
-        });
+        const gamesData = querySnapshot.docs
+          .map(doc => {
+            const data = doc.data();
+            console.log('Game data:', { id: doc.id, title: data.title });
+            return {
+              id: doc.id,
+              ...data,
+              date: data.date.toDate()
+            };
+          })
+          .sort((a, b) => b.date - a.date); // Sort in memory instead of using orderBy
         
         setGames(gamesData);
       } catch (error) {

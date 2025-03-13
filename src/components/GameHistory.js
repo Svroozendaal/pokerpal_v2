@@ -208,72 +208,164 @@ export default function GameHistory() {
       >
         {selectedGame && (
           <>
-            <DialogTitle>{selectedGame.title}</DialogTitle>
+            <DialogTitle>
+              <Typography 
+                variant="h4" 
+                align="center"
+                sx={{
+                  mb: 2,
+                  background: 'linear-gradient(45deg, #1f957d 30%, #2ab094 90%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  textShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+                  fontWeight: 700,
+                }}
+              >
+                PokerPal
+              </Typography>
+              <Typography variant="h6" align="center">
+                {selectedGame.title}
+              </Typography>
+            </DialogTitle>
             <DialogContent>
-              <Grid container spacing={4} sx={{ mt: 1 }}>
-                {/* Game Summary */}
-                <Grid item xs={12} md={6}>
-                  <Typography variant="h6" gutterBottom>
-                    Game Summary
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>
-                      Total Pot: {selectedGame.currency.symbol}{selectedGame.potValue.toFixed(2)}
-                    </Typography>
-                    <Typography>
-                      Coin Value: {selectedGame.currency.symbol}{selectedGame.settings.coinValue}
-                    </Typography>
-                    <Typography>
-                      Buy-in Value: {selectedGame.settings.buyInValue} chips
-                    </Typography>
-                  </Box>
-                </Grid>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  Total Pot Value: {selectedGame.currency.symbol}{selectedGame.potValue.toFixed(2)}
+                </Typography>
+              </Box>
 
-                {/* Player Results */}
-                <Grid item xs={12} md={6}>
-                  <Typography variant="h6" gutterBottom>
-                    Player Results
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    {selectedGame.results.map((player, index) => (
-                      <Typography
-                        key={index}
-                        color={player.result > 0 ? 'success.main' : player.result < 0 ? 'error.main' : 'text.primary'}
+              <TableContainer>
+                <Table size="small" sx={{ '& td, & th': { fontSize: '0.875rem' } }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell 
+                        sx={{ 
+                          py: 1,
+                          bgcolor: 'action.hover',
+                          fontWeight: 600,
+                          borderBottom: 2,
+                          width: '35%'
+                        }}
                       >
-                        {player.name}: {player.result > 0 ? '+' : ''}{selectedGame.currency.symbol}{player.result.toFixed(2)}
-                      </Typography>
+                        Name
+                      </TableCell>
+                      <TableCell 
+                        sx={{ 
+                          py: 1,
+                          bgcolor: 'action.hover',
+                          fontWeight: 600,
+                          borderBottom: 2,
+                          width: '20%'
+                        }}
+                      >
+                        Starting
+                      </TableCell>
+                      <TableCell 
+                        sx={{ 
+                          py: 1,
+                          bgcolor: 'action.hover',
+                          fontWeight: 600,
+                          borderBottom: 2,
+                          width: '20%'
+                        }}
+                      >
+                        Ending
+                      </TableCell>
+                      <TableCell 
+                        sx={{ 
+                          py: 1,
+                          bgcolor: 'action.hover',
+                          fontWeight: 600,
+                          borderBottom: 2,
+                          width: '25%'
+                        }}
+                      >
+                        Result
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {selectedGame.results.map((player, index) => (
+                      <TableRow key={index}>
+                        <TableCell sx={{ py: 1 }}>{player.name}</TableCell>
+                        <TableCell sx={{ py: 1 }}>{selectedGame.currency.symbol}{player.startingValue.toFixed(2)}</TableCell>
+                        <TableCell sx={{ py: 1 }}>{selectedGame.currency.symbol}{player.endingValue.toFixed(2)}</TableCell>
+                        <TableCell sx={{ py: 1 }}>{selectedGame.currency.symbol}{player.result.toFixed(2)}</TableCell>
+                      </TableRow>
                     ))}
-                  </Box>
-                </Grid>
+                  </TableBody>
+                </Table>
+              </TableContainer>
 
-                {/* Payouts */}
-                <Grid item xs={12}>
-                  <Divider sx={{ my: 2 }} />
-                  <Typography variant="h6" gutterBottom>
-                    Payouts
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    {selectedGame.payouts.map((payout, index) => (
-                      <Typography key={index}>{payout}</Typography>
-                    ))}
-                  </Box>
-                </Grid>
+              <Box sx={{ mt: 3, mb: 2 }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontSize: '1.1rem', 
+                    fontWeight: 600,
+                    color: 'primary.main',
+                    mb: 1.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}
+                >
+                  💰 Payouts
+                </Typography>
+                <Box sx={{ 
+                  bgcolor: 'background.paper', 
+                  p: 2, 
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'divider'
+                }}>
+                  {selectedGame.payouts.map((payout, index) => (
+                    <Typography 
+                      key={index}
+                      variant="body2"
+                      sx={{ mb: 1 }}
+                    >
+                      {payout}
+                    </Typography>
+                  ))}
+                </Box>
+              </Box>
 
-                {/* Player Stacks */}
-                <Grid item xs={12}>
-                  <Divider sx={{ my: 2 }} />
-                  <Typography variant="h6" gutterBottom>
-                    Player Stacks
+              <Divider sx={{ my: 2 }} />
+
+              <Box sx={{ mt: 3, mb: 2 }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontSize: '1.1rem', 
+                    fontWeight: 600,
+                    color: 'primary.main',
+                    mb: 1.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}
+                >
+                  ⚙️ Game Settings
+                </Typography>
+                <Box sx={{ 
+                  bgcolor: 'background.paper', 
+                  p: 2, 
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'divider'
+                }}>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    Coin Value: {selectedGame.currency.symbol}{selectedGame.settings.coinValue}
                   </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    {selectedGame.settings.players.map((player, index) => (
-                      <Typography key={index}>
-                        {player.name}: {player.startStack} → {player.endStack} chips
-                      </Typography>
-                    ))}
-                  </Box>
-                </Grid>
-              </Grid>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    Buy-in Value: {selectedGame.settings.buyInValue} chips
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    Date: {selectedGame.date.toLocaleDateString()}
+                  </Typography>
+                </Box>
+              </Box>
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setResultsDialogOpen(false)}>Close</Button>

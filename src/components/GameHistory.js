@@ -20,6 +20,8 @@ import {
   Button,
   Grid,
   Divider,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -33,6 +35,7 @@ export default function GameHistory() {
   const [error, setError] = useState(null);
   const [selectedGame, setSelectedGame] = useState(null);
   const [resultsDialogOpen, setResultsDialogOpen] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState(false);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
@@ -72,16 +75,33 @@ export default function GameHistory() {
     setResultsDialogOpen(true);
   };
 
-  const handleShare = async (gameId) => {
+  const handleShare = async (gameId, e) => {
+    e.stopPropagation();
+    if (!currentUser) {
+      setError('You must be logged in to share games');
+      return;
+    }
+
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/game/${gameId}`);
-      // You could add a snackbar notification here
+      const shareUrl = `${window.location.origin}/game/${gameId}`;
+      if (navigator.share) {
+        await navigator.share({
+          title: 'PokerPal Game',
+          text: 'Check out this poker game on PokerPal!',
+          url: shareUrl
+        });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareSuccess(true);
+      }
     } catch (error) {
-      console.error('Failed to copy link:', error);
+      console.error('Failed to share:', error);
+      setError('Failed to share game');
     }
   };
 
-  const handleViewGame = (gameId) => {
+  const handleViewGame = (gameId, e) => {
+    e.stopPropagation();
     navigate(`/game/${gameId}`);
   };
 
@@ -129,24 +149,21 @@ export default function GameHistory() {
                 <TableCell>{game.date.toLocaleDateString()}</TableCell>
                 <TableCell>{game.currency.symbol}{game.potValue.toFixed(2)}</TableCell>
                 <TableCell align="right">
-                  <Tooltip title="Share game">
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleShare(game.id);
-                      }}
-                    >
-                      <ShareIcon />
-                    </IconButton>
+                  <Tooltip title={currentUser ? "Share game" : "Login to share"}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => handleShare(game.id, e)}
+                        disabled={!currentUser}
+                      >
+                        <ShareIcon />
+                      </IconButton>
+                    </span>
                   </Tooltip>
                   <Tooltip title="View game">
                     <IconButton
                       size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewGame(game.id);
-                      }}
+                      onClick={(e) => handleViewGame(game.id, e)}
                     >
                       <VisibilityIcon />
                     </IconButton>
@@ -240,6 +257,32 @@ export default function GameHistory() {
           </>
         )}
       </Dialog>
+
+      {/* Share Success Snackbar */}
+      <Snackbar
+        open={shareSuccess}
+        autoHideDuration={3000}
+        onClose={() => setShareSuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" sx={{ width: '100%' }}>
+          Game link copied to clipboard!
+        </Alert>
+      </Snackbar>
+
+      {/* Error Snackbar */}
+      {error && (
+        <Snackbar
+          open={!!error}
+          autoHideDuration={3000}
+          onClose={() => setError(null)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        </Snackbar>
+      )}
     </Box>
   );
 } 

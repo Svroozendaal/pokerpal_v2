@@ -10,12 +10,15 @@ import {
   Button,
   Grid,
   Divider,
+  IconButton,
+  Tooltip,
+  Snackbar,
 } from '@mui/material';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useAuth } from '../contexts/AuthContext';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ShareIcon from '@mui/icons-material/Share';
-import { IconButton, Tooltip } from '@mui/material';
 
 export default function GameView() {
   const { gameId } = useParams();
@@ -23,6 +26,8 @@ export default function GameView() {
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [shareSuccess, setShareSuccess] = useState(false);
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -49,11 +54,26 @@ export default function GameView() {
   }, [gameId]);
 
   const handleShare = async () => {
+    if (!currentUser) {
+      setError('You must be logged in to share games');
+      return;
+    }
+
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/game/${gameId}`);
-      // You could add a snackbar notification here
+      const shareUrl = window.location.href;
+      if (navigator.share) {
+        await navigator.share({
+          title: 'PokerPal Game',
+          text: 'Check out this poker game on PokerPal!',
+          url: shareUrl
+        });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareSuccess(true);
+      }
     } catch (error) {
-      console.error('Failed to copy link:', error);
+      console.error('Failed to share:', error);
+      setError('Failed to share game');
     }
   };
 
@@ -95,10 +115,15 @@ export default function GameView() {
             <Typography variant="h4" component="h1" sx={{ flexGrow: 1 }}>
               {game.title}
             </Typography>
-            <Tooltip title="Share game">
-              <IconButton onClick={handleShare}>
-                <ShareIcon />
-              </IconButton>
+            <Tooltip title={currentUser ? "Share game" : "Login to share"}>
+              <span>
+                <IconButton 
+                  onClick={handleShare}
+                  disabled={!currentUser}
+                >
+                  <ShareIcon />
+                </IconButton>
+              </span>
             </Tooltip>
           </Box>
 
@@ -172,6 +197,32 @@ export default function GameView() {
           </Grid>
         </Paper>
       </Box>
+
+      {/* Share Success Snackbar */}
+      <Snackbar
+        open={shareSuccess}
+        autoHideDuration={3000}
+        onClose={() => setShareSuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" sx={{ width: '100%' }}>
+          Game link copied to clipboard!
+        </Alert>
+      </Snackbar>
+
+      {/* Error Snackbar */}
+      {error && (
+        <Snackbar
+          open={!!error}
+          autoHideDuration={3000}
+          onClose={() => setError(null)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        </Snackbar>
+      )}
     </Container>
   );
 } 

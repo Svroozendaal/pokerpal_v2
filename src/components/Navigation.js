@@ -88,7 +88,7 @@ export default function Navigation({ isDarkMode, toggleTheme }) {
           }}
         >
           <img
-            src="/images/Pokerpla_logo512.png"
+            src="/images/Pokerpal_logo512.png"
             alt="PokerPal Logo"
             style={{ height: '44px', marginRight: '8px' }}
           />

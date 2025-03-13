@@ -41,9 +41,14 @@ export default function GameHistory() {
 
   useEffect(() => {
     const fetchGames = async () => {
-      if (!currentUser) return;
+      if (!currentUser) {
+        setError('Please log in to view your game history');
+        setLoading(false);
+        return;
+      }
       
       try {
+        console.log('Fetching games for user:', currentUser.uid);
         const gamesRef = collection(db, 'games');
         const q = query(
           gamesRef,
@@ -52,16 +57,22 @@ export default function GameHistory() {
         );
         
         const querySnapshot = await getDocs(q);
-        const gamesData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          date: doc.data().date.toDate()
-        }));
+        console.log('Query snapshot:', querySnapshot.size, 'games found');
+        
+        const gamesData = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          console.log('Game data:', { id: doc.id, title: data.title });
+          return {
+            id: doc.id,
+            ...data,
+            date: data.date.toDate()
+          };
+        });
         
         setGames(gamesData);
       } catch (error) {
         console.error('Error fetching games:', error);
-        setError('Failed to load games');
+        setError(`Failed to load games: ${error.message}`);
       } finally {
         setLoading(false);
       }
@@ -116,7 +127,19 @@ export default function GameHistory() {
   if (error) {
     return (
       <Box sx={{ mt: 12, p: 3 }}>
-        <Typography color="error">{error}</Typography>
+        <Typography color="error" gutterBottom>
+          {error}
+        </Typography>
+        {!currentUser && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate('/login')}
+            sx={{ mt: 2 }}
+          >
+            Log In
+          </Button>
+        )}
       </Box>
     );
   }

@@ -17,16 +17,20 @@ import {
   Snackbar,
   Stack,
   Tooltip,
+  Alert,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import ShareIcon from '@mui/icons-material/Share';
 import TelegramIcon from '@mui/icons-material/Telegram';
+import { useAuth } from '../contexts/AuthContext';
 
-function ResultsDisplay({ results, potValue, onClose, currency = { symbol: '€', code: 'EUR' } }) {
+function ResultsDisplay({ results, potValue, onClose, currency = { symbol: '€', code: 'EUR' }, onSaveGame }) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const { currentUser } = useAuth();
   
   // Use the currency from props, as it will always be the current selected currency
   const activeCurrency = currency;
@@ -95,6 +99,7 @@ function ResultsDisplay({ results, potValue, onClose, currency = { symbol: '€'
     const text = formatPayoutsText();
     const success = await copyToClipboard(text);
     setSnackbarMessage(success ? 'Copied to clipboard' : 'Failed to copy. Try sharing instead.');
+    setSnackbarSeverity(success ? 'success' : 'error');
     setSnackbarOpen(true);
   };
 
@@ -109,6 +114,13 @@ function ResultsDisplay({ results, potValue, onClose, currency = { symbol: '€'
   };
 
   const handleShare = async () => {
+    if (!currentUser) {
+      setSnackbarMessage('Please log in to share your game');
+      setSnackbarSeverity('info');
+      setSnackbarOpen(true);
+      return;
+    }
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -248,18 +260,15 @@ function ResultsDisplay({ results, potValue, onClose, currency = { symbol: '€'
             {results.payouts.length > 0 ? (
               results.payouts.map((payout, index) => (
                 <Typography 
-                  key={index} 
-                  variant="body2" 
-                  sx={{ 
-                    mb: index < results.payouts.length - 1 ? 0.5 : 0,
-                    fontWeight: 500
-                  }}
+                  key={index}
+                  variant="body2"
+                  sx={{ mb: 1 }}
                 >
                   {payout}
                 </Typography>
               ))
             ) : (
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              <Typography variant="body2" color="text.secondary">
                 No payouts necessary.
               </Typography>
             )}
@@ -268,62 +277,80 @@ function ResultsDisplay({ results, potValue, onClose, currency = { symbol: '€'
 
         <Divider sx={{ my: 2 }} />
 
-        <Stack direction="row" spacing={1} justifyContent="flex-end">
-          <Tooltip title="Copy to clipboard">
-            <Button
-              size="small"
-              startIcon={<ContentCopyIcon />}
-              onClick={handleCopyToClipboard}
-              variant="outlined"
-            >
-              Copy
-            </Button>
+        <Stack 
+          direction="row" 
+          spacing={1} 
+          justifyContent="center"
+          sx={{ mt: 2 }}
+        >
+          <Tooltip title="Copy results to clipboard">
+            <IconButton onClick={handleCopyToClipboard} color="primary">
+              <ContentCopyIcon />
+            </IconButton>
           </Tooltip>
-          <Tooltip title="Share via WhatsApp">
-            <Button
-              size="small"
-              startIcon={<WhatsAppIcon />}
-              onClick={handleWhatsAppShare}
-              variant="outlined"
-              color="success"
-            >
-              WhatsApp
-            </Button>
-          </Tooltip>
-          <Tooltip title="Share via Telegram">
-            <Button
-              size="small"
-              startIcon={<TelegramIcon />}
-              onClick={handleTelegramShare}
-              variant="outlined"
-              color="info"
-            >
-              Telegram
-            </Button>
-          </Tooltip>
-          {navigator.share && (
-            <Tooltip title="Share">
-              <Button
-                size="small"
-                startIcon={<ShareIcon />}
-                onClick={handleShare}
-                variant="outlined"
-                color="secondary"
+
+          {currentUser ? (
+            <>
+              <Tooltip title="Share results">
+                <IconButton onClick={handleShare} color="primary">
+                  <ShareIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Share on WhatsApp">
+                <IconButton onClick={handleWhatsAppShare} color="primary">
+                  <WhatsAppIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Share on Telegram">
+                <IconButton onClick={handleTelegramShare} color="primary">
+                  <TelegramIcon />
+                </IconButton>
+              </Tooltip>
+            </>
+          ) : (
+            <Tooltip title="Login to share your game">
+              <IconButton 
+                onClick={() => {
+                  setSnackbarMessage('Please log in to share your game');
+                  setSnackbarSeverity('info');
+                  setSnackbarOpen(true);
+                }} 
+                color="primary"
               >
-                Share
-              </Button>
+                <ShareIcon />
+              </IconButton>
             </Tooltip>
           )}
         </Stack>
 
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={2000}
-          onClose={() => setSnackbarOpen(false)}
-          message={snackbarMessage}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        />
+        {currentUser && onSaveGame && (
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={onSaveGame}
+              startIcon={<ContentCopyIcon />}
+            >
+              Save This Game
+            </Button>
+          </Box>
+        )}
       </CardContent>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setSnackbarOpen(false)} 
+          severity={snackbarSeverity}
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Card>
   );
 }

@@ -97,6 +97,7 @@ function MainContent({ isDarkMode, setIsDarkMode, ...props }) {
                   results={props.results} 
                   potValue={props.potValue} 
                   currency={props.selectedCurrency}
+                  onSaveGame={() => props.setShowSaveDialog(true)}
                 />
                 {currentUser && (
                   <Button

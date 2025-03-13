@@ -49,10 +49,11 @@ export default function Navigation({ isDarkMode, toggleTheme }) {
     handleClose();
   };
 
-  const menuItems = [
+  const menuItems = currentUser ? [
     { label: 'Home', path: '/' },
     { label: 'Game History', path: '/history' },
-    { label: 'Terms', path: '/terms' },
+  ] : [
+    { label: 'Home', path: '/' },
   ];
 
   return (
@@ -132,7 +133,18 @@ export default function Navigation({ isDarkMode, toggleTheme }) {
                 </MenuItem>
               ))}
               {currentUser ? (
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                <>
+                  {isAdmin && (
+                    <MenuItem
+                      component={RouterLink}
+                      to="/admin"
+                      onClick={handleClose}
+                    >
+                      Admin
+                    </MenuItem>
+                  )}
+                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                </>
               ) : (
                 <>
                   <MenuItem
@@ -168,9 +180,21 @@ export default function Navigation({ isDarkMode, toggleTheme }) {
               ))}
             </Box>
             {currentUser ? (
-              <Button color="inherit" onClick={handleLogout}>
-                Logout
-              </Button>
+              <>
+                {isAdmin && (
+                  <Button
+                    color="inherit"
+                    component={RouterLink}
+                    to="/admin"
+                    startIcon={<AdminPanelSettingsIcon />}
+                  >
+                    Admin
+                  </Button>
+                )}
+                <Button color="inherit" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </>
             ) : (
               <>
                 <Button color="inherit" component={RouterLink} to="/login">

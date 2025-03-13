@@ -13,7 +13,7 @@ function ResultsDialog({ open, onClose, results, potValue, currency }) {
     <Dialog 
       open={open} 
       onClose={onClose} 
-      maxWidth="md" 
+      maxWidth="lg" 
       fullWidth
       PaperProps={{
         sx: {
@@ -21,11 +21,22 @@ function ResultsDialog({ open, onClose, results, potValue, currency }) {
           boxShadow: 'none',
           margin: {
             xs: 1, // 8px margin on mobile
-            sm: 2  // 16px margin on tablet and up
+            sm: 2,  // 16px margin on tablet and up
+            md: 4
           },
           width: {
             xs: 'calc(100% - 16px)', // full width minus 16px (8px on each side) on mobile
-            sm: 'auto'  // default width on tablet and up
+            sm: 'calc(100% - 32px)',
+            md: 'calc(100% - 64px)',
+            lg: '90%',
+            xl: '80%'
+          },
+          maxWidth: {
+            xs: '100%',
+            sm: '600px',
+            md: '800px',
+            lg: '1000px',
+            xl: '1200px'
           }
         }
       }}

@@ -157,7 +157,7 @@ export default function GameHistory() {
   if (!currentUser) return null;
 
   return (
-    <Box sx={{ width: '100%', mt: 2, p: 3 }}>
+    <Box sx={{ width: '100%', mt: 12, p: 3 }}>
       <Typography variant="h5" gutterBottom>
         Game History
       </Typography>

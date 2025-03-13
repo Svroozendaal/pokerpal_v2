@@ -17,6 +17,7 @@ import {
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
+import { useNavigate } from 'react-router-dom';
 
 export default function SaveGameDialog({ 
   open, 
@@ -33,6 +34,7 @@ export default function SaveGameDialog({
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
 
   const handleClose = (saved = false) => {
     if (!saving) {
@@ -71,18 +73,18 @@ export default function SaveGameDialog({
       // Prepare the data before the async operation
       const gameData = {
         title: title.trim(),
-        date: serverTimestamp(), // Use server timestamp instead of client date
+        date: serverTimestamp(),
         userId: currentUser.uid,
-        potValue: Number(potValue), // Ensure number type
+        potValue: Number(potValue),
         currency,
         results: results.playerResults.map(player => ({
           ...player,
-          result: Number(player.result) // Ensure number type
+          result: Number(player.result)
         })),
         payouts: results.payouts,
         settings: {
-          coinValue: Number(coinValue), // Ensure number type
-          buyInValue: Number(buyInValue), // Ensure number type
+          coinValue: Number(coinValue),
+          buyInValue: Number(buyInValue),
           players: players.map(player => ({
             name: player.name || 'Anonymous',
             startStack: Number(player.startStack) || 0,
@@ -96,7 +98,7 @@ export default function SaveGameDialog({
       // Single async operation with increased timeout
       const savePromise = addDoc(collection(db, 'games'), gameData);
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Save operation timed out')), 30000) // Increased timeout to 30 seconds
+        setTimeout(() => reject(new Error('Save operation timed out')), 30000)
       );
 
       console.log('Starting Firestore operation...');
@@ -105,6 +107,9 @@ export default function SaveGameDialog({
       
       setSuccess(true);
       handleClose(true);
+      
+      // Navigate to the game view page
+      navigate(`/game/${docRef.id}`);
     } catch (error) {
       console.error('Error saving game:', error);
       console.error('Error details:', {

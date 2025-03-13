@@ -14,7 +14,7 @@ export default function Terms() {
 
   return (
     <Container maxWidth="md">
-      <Box sx={{ mt: 8, mb: 4 }}>
+      <Box sx={{ mt: 12, mb: 4 }}>
         <Paper elevation={3} sx={{ p: 4 }}>
           <Typography variant="h4" component="h1" gutterBottom align="center">
             Terms and Conditions

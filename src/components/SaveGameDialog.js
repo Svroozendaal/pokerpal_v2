@@ -154,7 +154,7 @@ export default function SaveGameDialog({
             
             <Grid container spacing={4}>
               {/* Left Column - Game Summary */}
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
                   Game Summary
                 </Typography>
@@ -195,18 +195,18 @@ export default function SaveGameDialog({
                 </Grid>
               </Grid>
 
-              {/* Vertical Divider for MD screens and up */}
-              <Grid item md={0} sx={{ display: { xs: 'none', md: 'block' } }}>
+              {/* Vertical Divider for SM screens and up */}
+              <Grid item sm={0} sx={{ display: { xs: 'none', sm: 'block' } }}>
                 <Divider orientation="vertical" />
               </Grid>
 
               {/* Horizontal Divider for XS screens */}
-              <Grid item xs={12} sx={{ display: { xs: 'block', md: 'none' } }}>
+              <Grid item xs={12} sx={{ display: { xs: 'block', sm: 'none' } }}>
                 <Divider sx={{ my: 2 }} />
               </Grid>
 
               {/* Right Column - Player Results */}
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
                   Player Results
                 </Typography>

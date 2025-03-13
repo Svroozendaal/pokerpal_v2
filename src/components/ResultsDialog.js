@@ -34,9 +34,9 @@ function ResultsDialog({ open, onClose, results, potValue, currency }) {
           maxWidth: {
             xs: '100%',
             sm: '600px',
-            md: '800px',
-            lg: '1000px',
-            xl: '1200px'
+            md: '600px',
+            lg: '600px',
+            xl: '800px'
           }
         }
       }}

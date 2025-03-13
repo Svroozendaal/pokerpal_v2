@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
+  Typography,
   Button,
   Box,
   IconButton,
+  Menu,
+  MenuItem,
   useTheme,
-  Typography,
+  useMediaQuery,
 } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import HistoryIcon from '@mui/icons-material/History';
 import LoginIcon from '@mui/icons-material/Login';
@@ -21,19 +25,35 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 export default function Navigation({ isDarkMode, toggleTheme }) {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState(null);
   const theme = useTheme();
-  const [isHovered, setIsHovered] = useState(false);
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const isAdmin = currentUser?.email === 'dlcsblackops123@gmail.com'; // Replace with your admin email
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/');
+      navigate('/login');
     } catch (error) {
       console.error('Failed to log out:', error);
     }
+    handleClose();
   };
+
+  const menuItems = [
+    { label: 'Home', path: '/' },
+    { label: 'Game History', path: '/history' },
+    { label: 'Terms', path: '/terms' },
+  ];
 
   return (
     <AppBar 
@@ -54,96 +74,115 @@ export default function Navigation({ isDarkMode, toggleTheme }) {
           px: 2
         }}
       >
-        <Box 
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          sx={{ 
-            position: 'relative',
+        {/* Logo - Always visible */}
+        <Box
+          component={RouterLink}
+          to="/"
+          sx={{
             display: 'flex',
             alignItems: 'center',
-            minWidth: '200px'
+            mr: 3,
+            textDecoration: 'none',
+            color: 'inherit',
           }}
         >
-          <Box
+          <img
+            src="/images/logo.png"
+            alt="PokerPal Logo"
+            style={{ height: '40px', marginRight: '8px' }}
+          />
+          <Typography
+            variant="h6"
+            component="div"
             sx={{
-              position: 'absolute',
-              left: 0,
-              opacity: isHovered ? 0 : 1,
-              transition: 'opacity 0.3s ease',
-              display: 'flex',
-              alignItems: 'center',
+              fontWeight: 700,
+              fontSize: { xs: '1.2rem', sm: '1.5rem' },
             }}
           >
-            <img 
-              src="/images/Pokerpal_logo512.png" 
-              alt="Logo" 
-              style={{ 
-                height: '24px',
-                width: 'auto',
-                marginRight: '8px'
-              }} 
-            />
-          </Box>
+            PokerPal
+          </Typography>
+        </Box>
 
-          <Box
-            sx={{
-              position: 'absolute',
-              left: 0,
-              opacity: isHovered ? 1 : 0,
-              transition: 'opacity 0.3s ease',
-              display: 'flex',
-              gap: 2,
-            }}
-          >
-            {currentUser ? (
-              <>
-                <Button
-                  color="inherit"
-                  size="small"
-                  startIcon={<AccountCircleIcon />}
-                  onClick={() => navigate('/account')}
+        {/* Navigation Menu */}
+        {isMobile ? (
+          <>
+            <Box sx={{ flexGrow: 1 }} />
+            <IconButton
+              size="large"
+              edge="end"
+              color="inherit"
+              aria-label="menu"
+              onClick={handleMenu}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+            >
+              {menuItems.map((item) => (
+                <MenuItem
+                  key={item.path}
+                  component={RouterLink}
+                  to={item.path}
+                  onClick={handleClose}
                 >
-                  Account
-                </Button>
-                <Button
-                  color="inherit"
-                  size="small"
-                  startIcon={<HistoryIcon />}
-                  onClick={() => navigate('/history')}
-                >
-                  History
-                </Button>
-                {isAdmin && (
-                  <Button
-                    color="inherit"
-                    size="small"
-                    startIcon={<AdminPanelSettingsIcon />}
-                    onClick={() => navigate('/admin')}
+                  {item.label}
+                </MenuItem>
+              ))}
+              {currentUser ? (
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              ) : (
+                <>
+                  <MenuItem
+                    component={RouterLink}
+                    to="/login"
+                    onClick={handleClose}
                   >
-                    Admin
-                  </Button>
-                )}
+                    Login
+                  </MenuItem>
+                  <MenuItem
+                    component={RouterLink}
+                    to="/signup"
+                    onClick={handleClose}
+                  >
+                    Sign Up
+                  </MenuItem>
+                </>
+              )}
+            </Menu>
+          </>
+        ) : (
+          <>
+            <Box sx={{ display: 'flex', gap: 2, flexGrow: 1 }}>
+              {menuItems.map((item) => (
                 <Button
+                  key={item.path}
                   color="inherit"
-                  size="small"
-                  startIcon={<LogoutIcon />}
-                  onClick={handleLogout}
+                  component={RouterLink}
+                  to={item.path}
                 >
-                  Logout
+                  {item.label}
+                </Button>
+              ))}
+            </Box>
+            {currentUser ? (
+              <Button color="inherit" onClick={handleLogout}>
+                Logout
+              </Button>
+            ) : (
+              <>
+                <Button color="inherit" component={RouterLink} to="/login">
+                  Login
+                </Button>
+                <Button color="inherit" component={RouterLink} to="/signup">
+                  Sign Up
                 </Button>
               </>
-            ) : (
-              <Button
-                color="inherit"
-                size="small"
-                startIcon={<LoginIcon />}
-                onClick={() => navigate('/login')}
-              >
-                Login
-              </Button>
             )}
-          </Box>
-        </Box>
+          </>
+        )}
 
         <Typography
           variant="h6"

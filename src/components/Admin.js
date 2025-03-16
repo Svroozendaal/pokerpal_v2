@@ -28,6 +28,7 @@ import { useAuth } from '../contexts/AuthContext';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from 'react-router-dom';
+import ResultsTable from './ResultsTable';
 
 function TabPanel({ children, value, index, ...other }) {
   return (
@@ -214,55 +215,57 @@ export default function Admin() {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>Game Details</DialogTitle>
+        <DialogTitle>
+          <Typography variant="h6" gutterBottom>
+            {selectedGame?.title}
+          </Typography>
+          <Typography color="text.secondary">
+            Date: {selectedGame?.date.toLocaleDateString()}
+          </Typography>
+        </DialogTitle>
         <DialogContent>
           {selectedGame && (
             <Box>
-              <Typography variant="h6" gutterBottom>
-                {selectedGame.title}
-              </Typography>
-              <Typography color="text.secondary" gutterBottom>
-                Date: {selectedGame.date.toLocaleDateString()}
-              </Typography>
-              
-              <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-                Game Settings
-              </Typography>
-              <Typography>
-                Pot Value: {selectedGame.currency.symbol}{selectedGame.potValue.toFixed(2)}
-              </Typography>
-              <Typography>
-                Coin Value: {selectedGame.currency.symbol}{selectedGame.settings.coinValue}
-              </Typography>
-              <Typography>
-                Buy-in Value: {selectedGame.settings.buyInValue} chips
-              </Typography>
+              <ResultsTable 
+                results={selectedGame}
+                potValue={selectedGame.potValue}
+                currency={selectedGame.currency}
+                showPotValue={true}
+                elevation={0}
+              />
 
-              <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-                Player Results
-              </Typography>
-              {selectedGame.results.map((player, index) => (
-                <Typography 
-                  key={index}
-                  color={player.result > 0 ? 'success.main' : player.result < 0 ? 'error.main' : 'text.primary'}
-                >
-                  {player.name}: {player.result > 0 ? '+' : ''}{selectedGame.currency.symbol}{player.result.toFixed(2)}
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Game Settings
                 </Typography>
-              ))}
-
-              <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-                Payouts
-              </Typography>
-              {selectedGame.payouts.map((payout, index) => (
-                <Typography key={index}>{payout}</Typography>
-              ))}
+                <Typography variant="body2">
+                  Coin Value: {selectedGame.currency.symbol}{selectedGame.settings.coinValue}
+                </Typography>
+                <Typography variant="body2">
+                  Buy-in Value: {selectedGame.settings.buyInValue} chips
+                </Typography>
+              </Box>
             </Box>
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setViewDialogOpen(false)}>Close</Button>
+          <Button 
+            variant="contained" 
+            color="primary"
+            onClick={() => navigate(`/game/${selectedGame?.id}`)}
+          >
+            View Full Game
+          </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Error Alert */}
+      {error && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      )}
     </Box>
   );
 } 

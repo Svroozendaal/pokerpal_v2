@@ -28,6 +28,7 @@ import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import ShareIcon from '@mui/icons-material/Share';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import ResultsTable from './ResultsTable';
 
 export default function GameHistory() {
   const [games, setGames] = useState([]);
@@ -228,74 +229,13 @@ export default function GameHistory() {
               </Typography>
             </DialogTitle>
             <DialogContent>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  Total Pot Value: {selectedGame.currency.symbol}{selectedGame.potValue.toFixed(2)}
-                </Typography>
-              </Box>
-
-              <TableContainer>
-                <Table size="small" sx={{ '& td, & th': { fontSize: '0.875rem' } }}>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell 
-                        sx={{ 
-                          py: 1,
-                          bgcolor: 'action.hover',
-                          fontWeight: 600,
-                          borderBottom: 2,
-                          width: '35%'
-                        }}
-                      >
-                        Name
-                      </TableCell>
-                      <TableCell 
-                        sx={{ 
-                          py: 1,
-                          bgcolor: 'action.hover',
-                          fontWeight: 600,
-                          borderBottom: 2,
-                          width: '20%'
-                        }}
-                      >
-                        Starting
-                      </TableCell>
-                      <TableCell 
-                        sx={{ 
-                          py: 1,
-                          bgcolor: 'action.hover',
-                          fontWeight: 600,
-                          borderBottom: 2,
-                          width: '20%'
-                        }}
-                      >
-                        Ending
-                      </TableCell>
-                      <TableCell 
-                        sx={{ 
-                          py: 1,
-                          bgcolor: 'action.hover',
-                          fontWeight: 600,
-                          borderBottom: 2,
-                          width: '25%'
-                        }}
-                      >
-                        Result
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {selectedGame.results.map((player, index) => (
-                      <TableRow key={index}>
-                        <TableCell sx={{ py: 1 }}>{player.name}</TableCell>
-                        <TableCell sx={{ py: 1 }}>{selectedGame.currency.symbol}{player.startingValue.toFixed(2)}</TableCell>
-                        <TableCell sx={{ py: 1 }}>{selectedGame.currency.symbol}{player.endingValue.toFixed(2)}</TableCell>
-                        <TableCell sx={{ py: 1 }}>{selectedGame.currency.symbol}{player.result.toFixed(2)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <ResultsTable 
+                results={selectedGame}
+                potValue={selectedGame.potValue}
+                currency={selectedGame.currency}
+                showPotValue={true}
+                elevation={0}
+              />
 
               <Box sx={{ mt: 3, mb: 2 }}>
                 <Typography 
@@ -331,44 +271,27 @@ export default function GameHistory() {
                 </Box>
               </Box>
 
-              <Divider sx={{ my: 2 }} />
-
-              <Box sx={{ mt: 3, mb: 2 }}>
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    fontSize: '1.1rem', 
-                    fontWeight: 600,
-                    color: 'primary.main',
-                    mb: 1.5,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1
-                  }}
-                >
-                  ⚙️ Game Settings
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Game Settings
                 </Typography>
-                <Box sx={{ 
-                  bgcolor: 'background.paper', 
-                  p: 2, 
-                  borderRadius: 1,
-                  border: '1px solid',
-                  borderColor: 'divider'
-                }}>
-                  <Typography variant="body2" sx={{ mb: 1 }}>
-                    Coin Value: {selectedGame.currency.symbol}{selectedGame.settings.coinValue}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 1 }}>
-                    Buy-in Value: {selectedGame.settings.buyInValue} chips
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 1 }}>
-                    Date: {selectedGame.date.toLocaleDateString()}
-                  </Typography>
-                </Box>
+                <Typography variant="body2">
+                  Coin Value: {selectedGame.currency.symbol}{selectedGame.settings.coinValue}
+                </Typography>
+                <Typography variant="body2">
+                  Buy-in Value: {selectedGame.settings.buyInValue} chips
+                </Typography>
               </Box>
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setResultsDialogOpen(false)}>Close</Button>
+              <Button 
+                variant="contained" 
+                color="primary"
+                onClick={(e) => handleViewGame(selectedGame.id, e)}
+              >
+                View Full Game
+              </Button>
             </DialogActions>
           </>
         )}

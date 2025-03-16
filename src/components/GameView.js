@@ -61,14 +61,21 @@ export default function GameView() {
 
     try {
       const shareUrl = window.location.href;
+      const resultsText = game.results.map(player => 
+        `${player.name}: ${player.result > 0 ? '+' : ''}${game.currency.symbol}${player.result.toFixed(2)}`
+      ).join('\n');
+      const payoutsText = game.payouts.join('\n');
+      
+      const shareText = `🎲 PokerPal Game Results:\n\n${game.title}\n\nResults:\n${resultsText}\n\nPayouts:\n${payoutsText}\n\nView details at: ${shareUrl}`;
+      
       if (navigator.share) {
         await navigator.share({
-          title: 'PokerPal Game',
-          text: 'Check out this poker game on PokerPal!',
+          title: `PokerPal Game: ${game.title}`,
+          text: shareText,
           url: shareUrl
         });
       } else {
-        await navigator.clipboard.writeText(shareUrl);
+        await navigator.clipboard.writeText(shareText);
         setShareSuccess(true);
       }
     } catch (error) {

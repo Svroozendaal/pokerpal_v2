@@ -1,19 +1,19 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 
-function ResultsTable({ results, potValue }) {
+function ResultsTable({ results, potValue, currency = { symbol: '€', code: 'EUR' } }) {
   return (
     <TableContainer component={Paper} style={{ marginTop: '20px' }}>
       <Typography variant="h6">Results</Typography>
-      <Typography>Total Pot Value: €{potValue.toFixed(2)}</Typography>
+      <Typography>Total Pot Value: {currency.symbol}{potValue.toFixed(2)}</Typography>
 
       <Table>
         <TableHead>
           <TableRow>
             <TableCell>Name</TableCell>
-            <TableCell>Starting (€)</TableCell>
-            <TableCell>Ending (€)</TableCell>
-            <TableCell>Result (€)</TableCell>
+            <TableCell>Starting ({currency.symbol})</TableCell>
+            <TableCell>Ending ({currency.symbol})</TableCell>
+            <TableCell>Result ({currency.symbol})</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

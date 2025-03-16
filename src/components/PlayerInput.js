@@ -9,6 +9,28 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
     handlePlayerChange(index, field, newValue.toString());
   };
 
+  const numberInputSx = {
+    '& input[type=number]': {
+      MozAppearance: 'textfield',
+      '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+        WebkitAppearance: 'none',
+        backgroundColor: 'transparent',
+        position: 'absolute',
+        opacity: 1,
+        right: 8,
+        height: '80%',
+        top: '10%',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        width: '20px',
+        '&:hover': {
+          backgroundColor: 'transparent'
+        }
+      }
+    }
+  };
+
   return (
     <Card sx={{ marginBottom: 0.5, boxShadow: 1 }}>
       <CardContent sx={{ py: 0.5, px: 2 }}>
@@ -45,18 +67,11 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
                   fullWidth
                   size="small"
                   inputProps={{
-                    step: buyInValue
+                    step: buyInValue,
+                    inputMode: 'numeric',
+                    pattern: '[0-9]*'
                   }}
-                  sx={{
-                    '& input[type=number]::-webkit-inner-spin-button, & input[type=number]::-webkit-outer-spin-button': {
-                      opacity: 1,
-                      position: 'absolute',
-                      right: 4,
-                      height: '100%',
-                      width: 20,
-                      cursor: 'pointer',
-                    },
-                  }}
+                  sx={numberInputSx}
                 />
               </Grid>
               <Grid item xs={6} sx={{ position: 'relative' }}>
@@ -69,18 +84,11 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
                   fullWidth
                   size="small"
                   inputProps={{
-                    step: buyInValue
+                    step: buyInValue,
+                    inputMode: 'numeric',
+                    pattern: '[0-9]*'
                   }}
-                  sx={{
-                    '& input[type=number]::-webkit-inner-spin-button, & input[type=number]::-webkit-outer-spin-button': {
-                      opacity: 1,
-                      position: 'absolute',
-                      right: 4,
-                      height: '100%',
-                      width: 20,
-                      cursor: 'pointer',
-                    },
-                  }}
+                  sx={numberInputSx}
                 />
               </Grid>
             </Grid>

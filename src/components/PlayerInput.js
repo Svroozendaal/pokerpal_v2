@@ -6,9 +6,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInValue }) {
   const handleStackChange = (field, value) => {
-    // Ensure value is a number and not less than 0
-    const newValue = Math.max(0, parseFloat(value) || 0);
-    handlePlayerChange(index, field, newValue.toString());
+    handlePlayerChange(index, field, value);
   };
 
   const handleIncrement = (field) => {
@@ -23,7 +21,6 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
 
   const numberInputSx = {
     '& input[type=number]': {
-      MozAppearance: 'textfield',
       '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
         opacity: 1,
         position: 'absolute',
@@ -47,9 +44,7 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
         size="small"
         inputProps={{
           step: buyInValue,
-          min: 0,
-          inputMode: 'numeric',
-          pattern: '[0-9]*'
+          min: 0
         }}
         sx={numberInputSx}
       />

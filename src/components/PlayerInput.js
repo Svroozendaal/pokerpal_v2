@@ -1,31 +1,44 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Grid, TextField, IconButton, Card, CardContent, Box } from '@mui/material';
 import RemoveIcon from '@mui/icons-material/Remove';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInValue }) {
+  const [localValue, setLocalValue] = useState({
+    startStack: player.startStack,
+    endStack: player.endStack
+  });
+
   const handleStackChange = useCallback((field, value) => {
-    handlePlayerChange(index, field, value);
+    setLocalValue(prev => ({ ...prev, [field]: value }));
+    // Only update parent after user stops typing for 500ms
+    const timeoutId = setTimeout(() => {
+      handlePlayerChange(index, field, value);
+    }, 500);
+    return () => clearTimeout(timeoutId);
   }, [index, handlePlayerChange]);
 
   const handleIncrement = useCallback((field) => {
-    const currentValue = parseFloat(player[field]) || 0;
-    handlePlayerChange(index, field, currentValue + parseFloat(buyInValue));
-  }, [index, player, buyInValue, handlePlayerChange]);
+    const currentValue = parseFloat(localValue[field]) || 0;
+    const newValue = currentValue + parseFloat(buyInValue);
+    setLocalValue(prev => ({ ...prev, [field]: newValue }));
+    handlePlayerChange(index, field, newValue);
+  }, [index, localValue, buyInValue, handlePlayerChange]);
 
   const handleDecrement = useCallback((field) => {
-    const currentValue = parseFloat(player[field]) || 0;
+    const currentValue = parseFloat(localValue[field]) || 0;
     const newValue = Math.max(0, currentValue - parseFloat(buyInValue));
+    setLocalValue(prev => ({ ...prev, [field]: newValue }));
     handlePlayerChange(index, field, newValue);
-  }, [index, player, buyInValue, handlePlayerChange]);
+  }, [index, localValue, buyInValue, handlePlayerChange]);
 
   const StackInput = useCallback(({ field, label, value }) => (
     <Box sx={{ position: 'relative' }}>
       <TextField
         label={label}
         type="number"
-        value={value === null || value === undefined ? '' : value}
+        value={localValue[field]}
         onChange={(e) => handleStackChange(field, e.target.value)}
         variant="outlined"
         fullWidth
@@ -90,7 +103,15 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
         </IconButton>
       </Box>
     </Box>
-  ), [handleStackChange, handleIncrement, handleDecrement]);
+  ), [handleStackChange, handleIncrement, handleDecrement, localValue]);
+
+  // Update local value when prop changes
+  React.useEffect(() => {
+    setLocalValue({
+      startStack: player.startStack,
+      endStack: player.endStack
+    });
+  }, [player.startStack, player.endStack]);
 
   return (
     <Card sx={{ marginBottom: 0.5, boxShadow: 1 }}>

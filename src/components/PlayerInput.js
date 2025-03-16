@@ -1,106 +1,25 @@
 import React from 'react';
 import { Grid, TextField, IconButton, Card, CardContent, Box } from '@mui/material';
 import RemoveIcon from '@mui/icons-material/Remove';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInValue }) {
   const handleStackChange = (field, value) => {
-    const numValue = value === '' ? '' : parseFloat(value);
-    handlePlayerChange(index, field, numValue);
-  };
-
-  const handleIncrement = (field) => {
-    const currentValue = parseFloat(player[field]) || 0;
-    handlePlayerChange(index, field, currentValue + parseFloat(buyInValue));
-  };
-
-  const handleDecrement = (field) => {
-    const currentValue = parseFloat(player[field]) || 0;
-    const newValue = Math.max(0, currentValue - parseFloat(buyInValue));
-    handlePlayerChange(index, field, newValue);
-  };
-
-  const numberInputSx = {
-    '& input[type=number]': {
-      '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
-        WebkitAppearance: 'none',
-        margin: 0
-      },
-      MozAppearance: 'textfield'
-    }
+    handlePlayerChange(index, field, value);
   };
 
   const StackInput = ({ field, label, value }) => (
-    <Box sx={{ position: 'relative' }}>
-      <TextField
-        label={label}
-        type="number"
-        value={value === null || value === undefined ? '' : value}
-        onChange={(e) => handleStackChange(field, e.target.value)}
-        variant="outlined"
-        fullWidth
-        size="small"
-        sx={{
-          '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': {
-            WebkitAppearance: 'none',
-            margin: 0
-          },
-          '& input[type=number]': {
-            MozAppearance: 'textfield'
-          }
-        }}
-      />
-      <Box sx={{ 
-        position: 'absolute', 
-        right: 2, 
-        top: '50%', 
-        transform: 'translateY(-50%)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '2px',
-        pointerEvents: 'none'
-      }}>
-        <IconButton
-          size="small"
-          onClick={() => handleIncrement(field)}
-          sx={{ 
-            p: 0.3,
-            padding: '0px',
-            minWidth: '24px',
-            minHeight: '0px',
-            bgcolor: 'rgba(26, 38, 51, 0)',
-            borderRadius: '0%',
-            bgcolor: 'background.paper',
-            '&:hover': {
-              bgcolor: 'action.hover'
-            },
-            pointerEvents: 'auto'
-          }}
-        >
-          <KeyboardArrowUpIcon sx={{ fontSize: '1rem' }} />
-        </IconButton>
-        <IconButton
-          size="small"
-          onClick={() => handleDecrement(field)}
-          sx={{ 
-            p: 0.3,
-            padding: '0px',
-            minWidth: '24px',
-            minHeight: '0px',
-            bgcolor: 'rgba(26, 38, 51, 0)',
-            borderRadius: '0%',
-            bgcolor: 'background.paper',
-            '&:hover': {
-              bgcolor: 'action.hover'
-            },
-            pointerEvents: 'auto'
-          }}
-        >
-          <KeyboardArrowDownIcon sx={{ fontSize: '1rem' }} />
-        </IconButton>
-      </Box>
-    </Box>
+    <TextField
+      label={label}
+      type="number"
+      value={value}
+      onChange={(e) => handleStackChange(field, e.target.value)}
+      variant="outlined"
+      fullWidth
+      size="small"
+      inputProps={{
+        step: buyInValue
+      }}
+    />
   );
 
   return (

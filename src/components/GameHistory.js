@@ -14,21 +14,17 @@ import {
   IconButton,
   Tooltip,
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
   Button,
-  Grid,
-  Divider,
   Snackbar,
   Alert,
 } from '@mui/material';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import ShareIcon from '@mui/icons-material/Share';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import ResultsTable from './ResultsTable';
+import ResultsDisplay from './ResultsDisplay';
 
 export default function GameHistory() {
   const [games, setGames] = useState([]);
@@ -49,7 +45,6 @@ export default function GameHistory() {
       }
       
       try {
-        console.log('Fetching games for user:', currentUser.uid);
         const gamesRef = collection(db, 'games');
         const q = query(
           gamesRef,
@@ -57,19 +52,36 @@ export default function GameHistory() {
         );
         
         const querySnapshot = await getDocs(q);
-        console.log('Query snapshot:', querySnapshot.size, 'games found');
         
         const gamesData = querySnapshot.docs
           .map(doc => {
             const data = doc.data();
-            console.log('Game data:', { id: doc.id, title: data.title });
+            // Calculate player results with proper value formatting
+            const playerResults = data.settings.players.map(player => {
+              const startingValue = parseFloat(player.startStack) * parseFloat(data.settings.coinValue);
+              const endingValue = parseFloat(player.endStack) * parseFloat(data.settings.coinValue);
+              return {
+                name: player.name,
+                startStack: player.startStack,
+                endStack: player.endStack,
+                startingValue,
+                endingValue,
+                result: endingValue - startingValue
+              };
+            });
+
             return {
               id: doc.id,
-              ...data,
-              date: data.date.toDate()
+              title: data.title,
+              date: data.date.toDate(),
+              potValue: data.potValue,
+              currency: data.currency,
+              settings: data.settings,
+              playerResults,
+              payouts: data.payouts || []
             };
           })
-          .sort((a, b) => b.date - a.date); // Sort in memory instead of using orderBy
+          .sort((a, b) => b.date - a.date);
         
         setGames(gamesData);
       } catch (error) {
@@ -207,94 +219,23 @@ export default function GameHistory() {
         maxWidth="md"
         fullWidth
       >
-        {selectedGame && (
-          <>
-            <DialogTitle>
-              <Typography 
-                variant="h4" 
-                align="center"
-                sx={{
-                  mb: 2,
-                  background: 'linear-gradient(45deg, #1f957d 30%, #2ab094 90%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  textShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-                  fontWeight: 700,
-                }}
-              >
-                PokerPal
-              </Typography>
-              <Typography variant="h6" align="center">
-                {selectedGame.title}
-              </Typography>
-            </DialogTitle>
-            <DialogContent>
-              <ResultsTable 
-                results={selectedGame}
-                potValue={selectedGame.potValue}
-                currency={selectedGame.currency}
-                showPotValue={true}
-                elevation={0}
-              />
-
-              <Box sx={{ mt: 3, mb: 2 }}>
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    fontSize: '1.1rem', 
-                    fontWeight: 600,
-                    color: 'primary.main',
-                    mb: 1.5,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1
-                  }}
-                >
-                  💰 Payouts
-                </Typography>
-                <Box sx={{ 
-                  bgcolor: 'background.paper', 
-                  p: 2, 
-                  borderRadius: 1,
-                  border: '1px solid',
-                  borderColor: 'divider'
-                }}>
-                  {selectedGame.payouts.map((payout, index) => (
-                    <Typography 
-                      key={index}
-                      variant="body2"
-                      sx={{ mb: 1 }}
-                    >
-                      {payout}
-                    </Typography>
-                  ))}
-                </Box>
-              </Box>
-
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Game Settings
-                </Typography>
-                <Typography variant="body2">
-                  Coin Value: {selectedGame.currency.symbol}{selectedGame.settings.coinValue}
-                </Typography>
-                <Typography variant="body2">
-                  Buy-in Value: {selectedGame.settings.buyInValue} chips
-                </Typography>
-              </Box>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setResultsDialogOpen(false)}>Close</Button>
-              <Button 
-                variant="contained" 
-                color="primary"
-                onClick={(e) => handleViewGame(selectedGame.id, e)}
-              >
-                View Full Game
-              </Button>
-            </DialogActions>
-          </>
-        )}
+        <DialogContent sx={{ p: 0 }}>
+          {selectedGame && (
+            <ResultsDisplay
+              results={{
+                title: selectedGame.title,
+                date: selectedGame.date,
+                playerResults: selectedGame.playerResults,
+                payouts: selectedGame.payouts,
+                settings: selectedGame.settings
+              }}
+              potValue={selectedGame.potValue}
+              currency={selectedGame.currency}
+              gameId={selectedGame.id}
+              hasUnsavedChanges={false}
+            />
+          )}
+        </DialogContent>
       </Dialog>
 
       {/* Share Success Snackbar */}

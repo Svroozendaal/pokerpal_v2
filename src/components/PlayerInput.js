@@ -26,8 +26,12 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
     '& input[type=number]': {
       MozAppearance: 'textfield',
       '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
-        WebkitAppearance: 'none',
-        margin: 0
+        opacity: 1,
+        position: 'absolute',
+        right: 4,
+        height: '100%',
+        width: 20,
+        cursor: 'pointer',
       }
     }
   };
@@ -43,6 +47,7 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
         fullWidth
         size="small"
         inputProps={{
+          step: buyInValue,
           min: 0,
           inputMode: 'numeric',
           pattern: '[0-9]*'

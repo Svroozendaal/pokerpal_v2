@@ -28,14 +28,32 @@ function ShareWidget({
   };
 
   const getShareText = () => {
-    const winners = results.playerResults
-      .filter(player => player.result > 0)
-      .map(player => `${player.name}: +${currency.symbol}${player.result.toFixed(2)}`)
-      .join(', ');
+    // Title and total pot
+    let shareText = `PokerPal Results\n`;
+    shareText += `Total Pot: ${currency.symbol}${potValue.toFixed(2)}\n\n`;
 
-    const baseText = `Check out our poker game results! Total pot: ${currency.symbol}${potValue.toFixed(2)}. Winners: ${winners}.`;
+    // Player results section
+    shareText += `Results:\n`;
+    results.playerResults.forEach(player => {
+      const sign = player.result > 0 ? '+' : '';
+      shareText += `${player.name}: ${sign}${currency.symbol}${player.result.toFixed(2)}\n`;
+    });
+
+    // Payouts section
+    if (results.payouts && results.payouts.length > 0) {
+      shareText += `\nPayouts:\n`;
+      results.payouts.forEach(payout => {
+        shareText += `${payout}\n`;
+      });
+    }
+
+    // Add game link if available
     const url = getShareUrl();
-    return url ? `${baseText}\n\nView details at: ${url}` : baseText;
+    if (url) {
+      shareText += `\nCheck out the full game: ${url}`;
+    }
+
+    return shareText;
   };
 
   const handleShare = async (platform = null) => {

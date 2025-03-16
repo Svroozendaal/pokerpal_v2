@@ -6,9 +6,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInValue }) {
   const handleStackChange = (field, value) => {
-    // Only update if it's a valid number or empty
-    const newValue = value.replace(/[^\d]/g, '');
-    handlePlayerChange(index, field, newValue);
+    handlePlayerChange(index, field, value);
   };
 
   const handleIncrement = (field) => {
@@ -36,14 +34,20 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
     <Box sx={{ position: 'relative' }}>
       <TextField
         label={label}
-        type="text"
+        type="number"
         value={value}
         onChange={(e) => handleStackChange(field, e.target.value)}
         variant="outlined"
         fullWidth
         size="small"
-        inputProps={{
-          inputMode: 'numeric'
+        sx={{
+          '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': {
+            WebkitAppearance: 'none',
+            margin: 0
+          },
+          '& input[type=number]': {
+            MozAppearance: 'textfield'
+          }
         }}
       />
       <Box sx={{ 
@@ -53,7 +57,8 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
         transform: 'translateY(-50%)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '2px'
+        gap: '2px',
+        pointerEvents: 'none'
       }}>
         <IconButton
           size="small"
@@ -68,7 +73,8 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
             bgcolor: 'background.paper',
             '&:hover': {
               bgcolor: 'action.hover'
-            }
+            },
+            pointerEvents: 'auto'
           }}
         >
           <KeyboardArrowUpIcon sx={{ fontSize: '1rem' }} />
@@ -86,7 +92,8 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
             bgcolor: 'background.paper',
             '&:hover': {
               bgcolor: 'action.hover'
-            }
+            },
+            pointerEvents: 'auto'
           }}
         >
           <KeyboardArrowDownIcon sx={{ fontSize: '1rem' }} />

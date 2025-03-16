@@ -67,8 +67,11 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
           onClick={() => handleIncrement(field)}
           sx={{ 
             p: 0.3,
+            padding: '0px',
             minWidth: '24px',
-            minHeight: '24px',
+            minHeight: '0px',
+            backgroundColor: 'rgba(26, 38, 51, 0.5)',
+            borderRadius: '0%',
             bgcolor: 'background.paper',
             '&:hover': {
               bgcolor: 'action.hover'

@@ -23,10 +23,13 @@ function ResultsTable({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  // Use currency from results if available, otherwise use the prop
+  const displayCurrency = results.currency || currency;
+
   const formatCurrency = (value) => {
     const absValue = Math.abs(value);
     const formattedValue = absValue.toFixed(2);
-    return value < 0 ? `-${currency.symbol}${formattedValue}` : `${currency.symbol}${formattedValue}`;
+    return value < 0 ? `-${displayCurrency.symbol}${formattedValue}` : `${displayCurrency.symbol}${formattedValue}`;
   };
 
   return (
@@ -34,7 +37,7 @@ function ResultsTable({
       {showPotValue && (
         <Box sx={{ mb: 2 }}>
           <Typography variant="body2" sx={{ mb: 1 }}>
-            Total Pot Value: {currency.symbol}{potValue.toFixed(2)}
+            Total Pot Value: {displayCurrency.symbol}{potValue.toFixed(2)}
           </Typography>
         </Box>
       )}

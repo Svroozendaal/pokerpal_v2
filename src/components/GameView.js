@@ -30,10 +30,20 @@ export default function GameView() {
           setError('Game not found');
           return;
         }
+        const gameData = gameDoc.data();
         setGame({
           id: gameDoc.id,
-          ...gameDoc.data(),
-          date: gameDoc.data().date.toDate()
+          ...gameData,
+          date: gameData.date.toDate(),
+          // Ensure the results array has the correct structure
+          results: gameData.settings.players.map(player => ({
+            name: player.name,
+            startStack: player.startStack,
+            endStack: player.endStack,
+            result: parseFloat(player.endStack) - parseFloat(player.startStack)
+          })),
+          // Include payouts if they exist
+          payouts: gameData.payouts || []
         });
       } catch (error) {
         console.error('Error fetching game:', error);
@@ -89,7 +99,13 @@ export default function GameView() {
         </IconButton>
         
         <ResultsDisplay
-          results={game}
+          results={{
+            title: game.title,
+            date: game.date,
+            results: game.results,
+            payouts: game.payouts,
+            settings: game.settings
+          }}
           potValue={game.potValue}
           currency={game.currency}
           gameId={game.id}

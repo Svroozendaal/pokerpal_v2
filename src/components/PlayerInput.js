@@ -13,19 +13,17 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
     '& input[type=number]': {
       MozAppearance: 'textfield',
       '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
-        WebkitAppearance: 'none',
-        backgroundColor: 'transparent',
-        position: 'absolute',
+        WebkitAppearance: 'inner-spin-button',
         opacity: 1,
-        right: 8,
+        margin: 0,
         height: '80%',
+        position: 'absolute',
         top: '10%',
+        right: 8,
         cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        width: '20px',
+        color: 'rgba(0, 0, 0, 0.54)',
         '&:hover': {
-          backgroundColor: 'transparent'
+          backgroundColor: 'rgba(0, 0, 0, 0.04)'
         }
       }
     }
@@ -68,6 +66,7 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
                   size="small"
                   inputProps={{
                     step: buyInValue,
+                    min: 0,
                     inputMode: 'numeric',
                     pattern: '[0-9]*'
                   }}
@@ -85,6 +84,7 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
                   size="small"
                   inputProps={{
                     step: buyInValue,
+                    min: 0,
                     inputMode: 'numeric',
                     pattern: '[0-9]*'
                   }}

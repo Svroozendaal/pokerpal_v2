@@ -1,9 +1,8 @@
 import React from 'react';
 import { Grid, TextField, IconButton, Card, CardContent, Box } from '@mui/material';
 import RemoveIcon from '@mui/icons-material/Remove';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInValue }) {
   const handleStackChange = (field, value) => {
@@ -76,7 +75,7 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
             }
           }}
         >
-          <AddCircleOutlineIcon sx={{ fontSize: '1rem' }} />
+          <KeyboardArrowUpIcon sx={{ fontSize: '1rem' }} />
         </IconButton>
         <IconButton
           size="small"
@@ -91,7 +90,7 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
             }
           }}
         >
-          <RemoveCircleOutlineIcon sx={{ fontSize: '1rem' }} />
+          <KeyboardArrowDownIcon sx={{ fontSize: '1rem' }} />
         </IconButton>
       </Box>
     </Box>
@@ -115,6 +114,7 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
             <TextField
               label="Name"
               value={player.name}
+              placeholder={`Player ${index + 1}`}
               onChange={(e) => handlePlayerChange(index, 'name', e.target.value)}
               variant="outlined"
               fullWidth

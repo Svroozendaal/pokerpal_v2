@@ -28,20 +28,64 @@ function ResultsDisplay({
   return (
     <Card sx={{ position: 'relative', overflow: 'visible' }}>
       <CardContent sx={{ py: 2 }}>
-        <Typography 
-          variant="h4" 
-          align="center"
+        {/* Logo */}
+        <Box 
+          component="img"
+          src="/images/Pokerpal_logo512.png"
+          alt="PokerPal Logo"
           sx={{
-            mb: 2,
-            background: 'linear-gradient(45deg, #1f957d 30%, #2ab094 90%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            textShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-            fontWeight: 700,
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            width: 48,
+            height: 48,
+            objectFit: 'contain'
           }}
-        >
-          PokerPal
-        </Typography>
+        />
+
+        {/* Title Section */}
+        <Box sx={{ mb: 4, textAlign: 'center' }}>
+          {results.title ? (
+            <>
+              <Typography 
+                variant="h4" 
+                sx={{
+                  mb: 1,
+                  background: 'linear-gradient(45deg, #1f957d 30%, #2ab094 90%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  textShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+                  fontWeight: 700,
+                }}
+              >
+                {results.title}
+              </Typography>
+              {results.date && (
+                <Typography 
+                  variant="subtitle1" 
+                  color="text.secondary"
+                  sx={{ fontWeight: 500 }}
+                >
+                  {results.date.toLocaleDateString()}
+                </Typography>
+              )}
+            </>
+          ) : (
+            <Typography 
+              variant="h4" 
+              sx={{
+                mb: 1,
+                background: 'linear-gradient(45deg, #1f957d 30%, #2ab094 90%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+                fontWeight: 700,
+              }}
+            >
+              PokerPal
+            </Typography>
+          )}
+        </Box>
 
         <ResultsTable 
           results={results}

@@ -31,7 +31,7 @@ function ResultsDisplay({
         {/* Logo */}
         <Box 
           component="img"
-          src="/images/Pokerpal_logo512.png"
+          src={process.env.PUBLIC_URL + '/images/Pokerpal_logo512.png'}
           alt="PokerPal Logo"
           sx={{
             position: 'absolute',
@@ -40,6 +40,10 @@ function ResultsDisplay({
             width: 48,
             height: 48,
             objectFit: 'contain'
+          }}
+          onError={(e) => {
+            console.warn('Failed to load logo:', e);
+            e.target.style.display = 'none';
           }}
         />
 

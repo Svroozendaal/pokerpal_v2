@@ -144,6 +144,7 @@ function MainContent({ isDarkMode, setIsDarkMode, ...props }) {
         coinValue={props.coinValue}
         buyInValue={props.buyInValue}
         players={props.players}
+        gameTitle={props.gameTitle}
       />
     </>
   );
@@ -167,6 +168,8 @@ function App() {
   const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState({ code: 'EUR', symbol: '€', name: 'Euro' });
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [gameTitle, setGameTitle] = useState('');
 
   useEffect(() => {
     const totalStarting = players.reduce((acc, player) => acc + (parseFloat(player.startStack) || 0), 0);
@@ -174,6 +177,12 @@ function App() {
     setTotalStartingStack(totalStarting);
     setTotalEndingStack(totalEnding);
   }, [players]);
+
+  useEffect(() => {
+    if (results.playerResults && results.playerResults.length > 0) {
+      setHasUnsavedChanges(true);
+    }
+  }, [results]);
 
   const handlePlayerChange = (index, field, value) => {
     const newPlayers = [...players];
@@ -194,12 +203,32 @@ function App() {
   };
 
   const calculatePayouts = () => {
-    if (checkStackDiscrepancy()) return;
+    // Set empty stacks to 0 first
+    const updatedPlayers = players.map(player => ({
+      ...player,
+      startStack: player.startStack === '' ? '0' : player.startStack,
+      endStack: player.endStack === '' ? '0' : player.endStack
+    }));
+    setPlayers(updatedPlayers);
 
-    const totalPot = totalEndingStack * parseFloat(coinValue);
+    // Recalculate totals with updated values
+    const totalStarting = updatedPlayers.reduce((acc, player) => acc + (parseFloat(player.startStack) || 0), 0);
+    const totalEnding = updatedPlayers.reduce((acc, player) => acc + (parseFloat(player.endStack) || 0), 0);
+    setTotalStartingStack(totalStarting);
+    setTotalEndingStack(totalEnding);
+
+    // Check for discrepancy with updated values
+    const discrepancy = totalStarting - totalEnding;
+    if (discrepancy !== 0) {
+      setDiscrepancy(discrepancy * parseFloat(coinValue));
+      setShowDiscrepancyModal(true);
+      return;
+    }
+
+    const totalPot = totalEnding * parseFloat(coinValue);
     setPotValue(totalPot);
 
-    const playerResults = players.map((player, index) => {
+    const playerResults = updatedPlayers.map((player, index) => {
       const startingValue = parseFloat(player.startStack) * parseFloat(coinValue);
       const endingValue = parseFloat(player.endStack) * parseFloat(coinValue);
       const result = endingValue - startingValue;
@@ -237,6 +266,25 @@ function App() {
     setSelectedCurrency(newCurrency);
   };
 
+  const handleNewGame = () => {
+    setPlayers([
+      { name: '', startStack: '1000', endStack: '' },
+      { name: '', startStack: '1000', endStack: '' },
+      { name: '', startStack: '1000', endStack: '' }
+    ]);
+    setCoinValue('0.01');
+    setBuyInValue('1000');
+    setResults({ playerResults: [], payouts: [] });
+    setPotValue(0);
+    setDiscrepancy(0);
+    setShowDiscrepancyModal(false);
+    setTotalStartingStack(0);
+    setTotalEndingStack(0);
+    setShowResultsDialog(false);
+    setHasUnsavedChanges(false);
+    setGameTitle('');
+  };
+
   const mainProps = {
     players,
     setPlayers,
@@ -250,6 +298,7 @@ function App() {
     showDiscrepancyModal,
     setShowDiscrepancyModal,
     discrepancy,
+    setDiscrepancy,
     showResultsDialog,
     setShowResultsDialog,
     handlePlayerChange,
@@ -260,6 +309,10 @@ function App() {
     totalEndingStack,
     showSaveDialog,
     setShowSaveDialog,
+    hasUnsavedChanges,
+    onNewGame: handleNewGame,
+    gameTitle,
+    setGameTitle,
   };
 
   return (

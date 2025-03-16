@@ -1,35 +1,30 @@
 import React from 'react';
-import { Container, Box } from '@mui/material';
+import { Box } from '@mui/material';
+import Footer from './Footer';
 
 function AppContainer({ children }) {
   return (
-    <Container 
-      maxWidth="xl"
+    <Box
       sx={{
-        maxWidth: {
-          xs: '100%',
-          md: '1200px',
-        },
-        px: {
-          xs: 2,
-          sm: 3,
-          md: 4,
-        },
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
       }}
     >
-      <Box 
-        py={3}
+      <Box
+        component="main"
         sx={{
-          py: {
-            xs: 2,
-            sm: 3,
-            md: 4,
-          },
+          flex: '1 0 auto',
+          p: { xs: 2, sm: 3 },
+          width: '100%',
+          maxWidth: '1400px',
+          mx: 'auto',
         }}
       >
         {children}
       </Box>
-    </Container>
+      <Footer />
+    </Box>
   );
 }
 

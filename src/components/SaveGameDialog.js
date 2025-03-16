@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -27,14 +27,21 @@ export default function SaveGameDialog({
   currency,
   coinValue,
   buyInValue,
-  players
+  players,
+  gameTitle: initialGameTitle = '',
 }) {
   const [title, setTitle] = useState('');
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (open && initialGameTitle) {
+      setTitle(initialGameTitle);
+    }
+  }, [open, initialGameTitle]);
 
   const handleClose = (saved = false) => {
     if (!saving) {

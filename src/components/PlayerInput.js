@@ -70,7 +70,7 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
             padding: '0px',
             minWidth: '24px',
             minHeight: '0px',
-            backgroundColor: 'rgba(26, 38, 51, 0.5)',
+            bgcolor: 'rgba(26, 38, 51, 0)',
             borderRadius: '0%',
             bgcolor: 'background.paper',
             '&:hover': {
@@ -85,8 +85,11 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
           onClick={() => handleDecrement(field)}
           sx={{ 
             p: 0.3,
+            padding: '0px',
             minWidth: '24px',
-            minHeight: '24px',
+            minHeight: '0px',
+            bgcolor: 'rgba(26, 38, 51, 0)',
+            borderRadius: '0%',
             bgcolor: 'background.paper',
             '&:hover': {
               bgcolor: 'action.hover'

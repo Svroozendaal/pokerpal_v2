@@ -25,11 +25,9 @@ import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import ShareIcon from '@mui/icons-material/Share';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import { useAuth } from '../contexts/AuthContext';
+import ShareWidget from './ShareWidget';
 
-function ResultsDisplay({ results, potValue, onClose, currency = { symbol: '€', code: 'EUR' }, onSaveGame }) {
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+function ResultsDisplay({ results, potValue, onClose, currency = { symbol: '€', code: 'EUR' }, onSaveGame, gameId, hasUnsavedChanges }) {
   const { currentUser } = useAuth();
   
   // Use the currency from props, as it will always be the current selected currency
@@ -134,7 +132,7 @@ function ResultsDisplay({ results, potValue, onClose, currency = { symbol: '€'
   };
 
   return (
-    <Card sx={{ marginTop: 0, boxShadow: 3 }}>
+    <Card sx={{ position: 'relative', overflow: 'visible' }}>
       <CardContent sx={{ py: 2 }}>
         <Typography 
           variant="h4" 
@@ -277,64 +275,16 @@ function ResultsDisplay({ results, potValue, onClose, currency = { symbol: '€'
 
         <Divider sx={{ my: 2 }} />
 
-        <Stack 
-          direction="row" 
-          spacing={1} 
-          justifyContent="center"
-          sx={{ mt: 2 }}
-        >
-          <Tooltip title="Copy results to clipboard">
-            <IconButton onClick={handleCopyToClipboard} color="primary">
-              <ContentCopyIcon />
-            </IconButton>
-          </Tooltip>
-
-          {currentUser ? (
-            <>
-              <Tooltip title="Share results">
-                <IconButton onClick={handleShare} color="primary">
-                  <ShareIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Share on WhatsApp">
-                <IconButton onClick={handleWhatsAppShare} color="primary">
-                  <WhatsAppIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Share on Telegram">
-                <IconButton onClick={handleTelegramShare} color="primary">
-                  <TelegramIcon />
-                </IconButton>
-              </Tooltip>
-            </>
-          ) : (
-            <Tooltip title="Login to share your game">
-              <IconButton 
-                onClick={() => {
-                  setSnackbarMessage('Please log in to share your game');
-                  setSnackbarSeverity('info');
-                  setSnackbarOpen(true);
-                }} 
-                color="primary"
-              >
-                <ShareIcon />
-              </IconButton>
-            </Tooltip>
-          )}
-        </Stack>
-
-        {currentUser && onSaveGame && (
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={onSaveGame}
-              startIcon={<ContentCopyIcon />}
-            >
-              Save This Game
-            </Button>
-          </Box>
-        )}
+        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+          <ShareWidget
+            gameId={gameId}
+            results={results}
+            potValue={potValue}
+            currency={currency}
+            onSavePrompt={onSaveGame}
+            hasUnsavedChanges={hasUnsavedChanges}
+          />
+        </Box>
       </CardContent>
 
       <Snackbar

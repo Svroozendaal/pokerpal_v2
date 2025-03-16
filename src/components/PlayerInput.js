@@ -6,17 +6,21 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInValue }) {
   const handleStackChange = (field, value) => {
-    handlePlayerChange(index, field, value);
+    // Allow only numbers
+    if (value === '' || /^\d*$/.test(value)) {
+      handlePlayerChange(index, field, value);
+    }
   };
 
   const handleIncrement = (field) => {
-    const currentValue = parseFloat(player[field]) || 0;
-    handleStackChange(field, currentValue + parseFloat(buyInValue));
+    const currentValue = parseInt(player[field]) || 0;
+    handlePlayerChange(index, field, (currentValue + parseInt(buyInValue)).toString());
   };
 
   const handleDecrement = (field) => {
-    const currentValue = parseFloat(player[field]) || 0;
-    handleStackChange(field, currentValue - parseFloat(buyInValue));
+    const currentValue = parseInt(player[field]) || 0;
+    const newValue = Math.max(0, currentValue - parseInt(buyInValue));
+    handlePlayerChange(index, field, newValue.toString());
   };
 
   const numberInputSx = {
@@ -33,16 +37,16 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
     <Box sx={{ position: 'relative' }}>
       <TextField
         label={label}
-        type="number"
+        type="text"
         value={value}
         onChange={(e) => handleStackChange(field, e.target.value)}
         variant="outlined"
         fullWidth
         size="small"
         inputProps={{
-          min: 0
+          inputMode: 'numeric',
+          pattern: '[0-9]*'
         }}
-        sx={numberInputSx}
       />
       <Box sx={{ 
         position: 'absolute', 

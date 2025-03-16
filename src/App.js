@@ -1,5 +1,5 @@
 // App.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Typography, Button, Box } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import AppContainer from './components/AppContainer';
@@ -23,6 +23,12 @@ import Account from './components/Account';
 import GameView from './components/GameView';
 import Admin from './components/Admin';
 import Terms from './components/Terms';
+import LazyLoad from './components/LazyLoad';
+
+// Lazy load components that aren't immediately needed
+const LazyGameView = lazy(() => import('./components/GameView'));
+const LazyAdmin = lazy(() => import('./components/Admin'));
+const LazyGameHistory = lazy(() => import('./components/GameHistory'));
 
 function MainContent({ isDarkMode, setIsDarkMode, ...props }) {
   const { currentUser } = useAuth();
@@ -336,10 +342,22 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/terms" element={<Terms />} />
-            <Route path="/history" element={<GameHistory />} />
+            <Route path="/history" element={
+              <LazyLoad>
+                <LazyGameHistory />
+              </LazyLoad>
+            } />
             <Route path="/account" element={<Account />} />
-            <Route path="/game/:gameId" element={<GameView />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/game/:gameId" element={
+              <LazyLoad>
+                <LazyGameView />
+              </LazyLoad>
+            } />
+            <Route path="/admin" element={
+              <LazyLoad>
+                <LazyAdmin />
+              </LazyLoad>
+            } />
           </Routes>
         </AuthProvider>
       </Router>

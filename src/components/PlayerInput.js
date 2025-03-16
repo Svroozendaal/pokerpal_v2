@@ -6,18 +6,19 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInValue }) {
   const handleStackChange = (field, value) => {
-    handlePlayerChange(index, field, value);
+    const numValue = value === '' ? '' : parseFloat(value);
+    handlePlayerChange(index, field, numValue);
   };
 
   const handleIncrement = (field) => {
-    const currentValue = parseInt(player[field]) || 0;
-    handlePlayerChange(index, field, (currentValue + parseInt(buyInValue)).toString());
+    const currentValue = parseFloat(player[field]) || 0;
+    handlePlayerChange(index, field, currentValue + parseFloat(buyInValue));
   };
 
   const handleDecrement = (field) => {
-    const currentValue = parseInt(player[field]) || 0;
-    const newValue = Math.max(0, currentValue - parseInt(buyInValue));
-    handlePlayerChange(index, field, newValue.toString());
+    const currentValue = parseFloat(player[field]) || 0;
+    const newValue = Math.max(0, currentValue - parseFloat(buyInValue));
+    handlePlayerChange(index, field, newValue);
   };
 
   const numberInputSx = {
@@ -35,7 +36,7 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
       <TextField
         label={label}
         type="number"
-        value={value}
+        value={value === null || value === undefined ? '' : value}
         onChange={(e) => handleStackChange(field, e.target.value)}
         variant="outlined"
         fullWidth

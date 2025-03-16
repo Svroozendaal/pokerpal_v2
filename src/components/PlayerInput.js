@@ -1,10 +1,82 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, memo } from 'react';
 import { Grid, TextField, IconButton, Card, CardContent, Box } from '@mui/material';
 import RemoveIcon from '@mui/icons-material/Remove';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
-function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInValue }) {
+const StackInput = memo(({ field, label, value, onChange, onIncrement, onDecrement }) => (
+  <Box sx={{ position: 'relative' }}>
+    <TextField
+      label={label}
+      type="number"
+      value={value}
+      onChange={onChange}
+      variant="outlined"
+      fullWidth
+      size="small"
+      sx={{
+        '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': {
+          WebkitAppearance: 'none',
+          margin: 0
+        },
+        '& input[type=number]': {
+          MozAppearance: 'textfield'
+        }
+      }}
+    />
+    <Box sx={{ 
+      position: 'absolute', 
+      right: 2, 
+      top: '50%', 
+      transform: 'translateY(-50%)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '2px',
+      pointerEvents: 'none'
+    }}>
+      <IconButton
+        size="small"
+        onClick={onIncrement}
+        sx={{ 
+          p: 0.3,
+          padding: '0px',
+          minWidth: '24px',
+          minHeight: '0px',
+          bgcolor: 'rgba(26, 38, 51, 0)',
+          borderRadius: '0%',
+          bgcolor: 'background.paper',
+          '&:hover': {
+            bgcolor: 'action.hover'
+          },
+          pointerEvents: 'auto'
+        }}
+      >
+        <KeyboardArrowUpIcon sx={{ fontSize: '1rem' }} />
+      </IconButton>
+      <IconButton
+        size="small"
+        onClick={onDecrement}
+        sx={{ 
+          p: 0.3,
+          padding: '0px',
+          minWidth: '24px',
+          minHeight: '0px',
+          bgcolor: 'rgba(26, 38, 51, 0)',
+          borderRadius: '0%',
+          bgcolor: 'background.paper',
+          '&:hover': {
+            bgcolor: 'action.hover'
+          },
+          pointerEvents: 'auto'
+        }}
+      >
+        <KeyboardArrowDownIcon sx={{ fontSize: '1rem' }} />
+      </IconButton>
+    </Box>
+  </Box>
+));
+
+const PlayerInput = memo(({ player, index, handlePlayerChange, removePlayer, buyInValue }) => {
   const handleIncrement = useCallback((field) => {
     const currentValue = parseFloat(player[field]) || 0;
     const newValue = currentValue + parseFloat(buyInValue);
@@ -17,77 +89,9 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
     handlePlayerChange(index, field, newValue);
   }, [index, player, buyInValue, handlePlayerChange]);
 
-  const StackInput = useCallback(({ field, label }) => (
-    <Box sx={{ position: 'relative' }}>
-      <TextField
-        label={label}
-        type="number"
-        value={player[field]}
-        onChange={(e) => handlePlayerChange(index, field, e.target.value)}
-        variant="outlined"
-        fullWidth
-        size="small"
-        sx={{
-          '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': {
-            WebkitAppearance: 'none',
-            margin: 0
-          },
-          '& input[type=number]': {
-            MozAppearance: 'textfield'
-          }
-        }}
-      />
-      <Box sx={{ 
-        position: 'absolute', 
-        right: 2, 
-        top: '50%', 
-        transform: 'translateY(-50%)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '2px',
-        pointerEvents: 'none'
-      }}>
-        <IconButton
-          size="small"
-          onClick={() => handleIncrement(field)}
-          sx={{ 
-            p: 0.3,
-            padding: '0px',
-            minWidth: '24px',
-            minHeight: '0px',
-            bgcolor: 'rgba(26, 38, 51, 0)',
-            borderRadius: '0%',
-            bgcolor: 'background.paper',
-            '&:hover': {
-              bgcolor: 'action.hover'
-            },
-            pointerEvents: 'auto'
-          }}
-        >
-          <KeyboardArrowUpIcon sx={{ fontSize: '1rem' }} />
-        </IconButton>
-        <IconButton
-          size="small"
-          onClick={() => handleDecrement(field)}
-          sx={{ 
-            p: 0.3,
-            padding: '0px',
-            minWidth: '24px',
-            minHeight: '0px',
-            bgcolor: 'rgba(26, 38, 51, 0)',
-            borderRadius: '0%',
-            bgcolor: 'background.paper',
-            '&:hover': {
-              bgcolor: 'action.hover'
-            },
-            pointerEvents: 'auto'
-          }}
-        >
-          <KeyboardArrowDownIcon sx={{ fontSize: '1rem' }} />
-        </IconButton>
-      </Box>
-    </Box>
-  ), [handleIncrement, handleDecrement, player, index, handlePlayerChange]);
+  const handleChange = useCallback((field) => (event) => {
+    handlePlayerChange(index, field, event.target.value);
+  }, [index, handlePlayerChange]);
 
   return (
     <Card sx={{ marginBottom: 0.5, boxShadow: 1 }}>
@@ -108,7 +112,7 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
               label="Name"
               value={player.name}
               placeholder={`Player ${index + 1}`}
-              onChange={(e) => handlePlayerChange(index, 'name', e.target.value)}
+              onChange={handleChange('name')}
               variant="outlined"
               fullWidth
               size="small"
@@ -120,12 +124,20 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
                 <StackInput
                   field="startStack"
                   label="Starting Stack"
+                  value={player.startStack}
+                  onChange={handleChange('startStack')}
+                  onIncrement={() => handleIncrement('startStack')}
+                  onDecrement={() => handleDecrement('startStack')}
                 />
               </Grid>
               <Grid item xs={6}>
                 <StackInput
                   field="endStack"
                   label="Ending Stack"
+                  value={player.endStack}
+                  onChange={handleChange('endStack')}
+                  onIncrement={() => handleIncrement('endStack')}
+                  onDecrement={() => handleDecrement('endStack')}
                 />
               </Grid>
             </Grid>
@@ -134,6 +146,6 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
       </CardContent>
     </Card>
   );
-}
+});
 
-export default React.memo(PlayerInput);
+export default PlayerInput;

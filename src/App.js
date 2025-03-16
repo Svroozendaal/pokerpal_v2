@@ -1,5 +1,5 @@
 // App.js
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy, useCallback } from 'react';
 import { Typography, Button, Box } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import AppContainer from './components/AppContainer';
@@ -181,8 +181,14 @@ function App() {
   useEffect(() => {
     const totalStarting = players.reduce((acc, player) => acc + (parseFloat(player.startStack) || 0), 0);
     const totalEnding = players.reduce((acc, player) => acc + (parseFloat(player.endStack) || 0), 0);
-    setTotalStartingStack(totalStarting);
-    setTotalEndingStack(totalEnding);
+    
+    // Only update if values have actually changed
+    if (totalStarting !== totalStartingStack) {
+      setTotalStartingStack(totalStarting);
+    }
+    if (totalEnding !== totalEndingStack) {
+      setTotalEndingStack(totalEnding);
+    }
   }, [players]);
 
   useEffect(() => {
@@ -191,11 +197,16 @@ function App() {
     }
   }, [results]);
 
-  const handlePlayerChange = (index, field, value) => {
-    const newPlayers = [...players];
-    newPlayers[index][field] = value;
-    setPlayers(newPlayers);
-  };
+  const handlePlayerChange = useCallback((index, field, value) => {
+    setPlayers(prevPlayers => {
+      const newPlayers = [...prevPlayers];
+      newPlayers[index] = {
+        ...newPlayers[index],
+        [field]: value
+      };
+      return newPlayers;
+    });
+  }, []);
 
   const addPlayer = () => setPlayers([...players, { name: '', startStack: buyInValue, endStack: '' }]);
 

@@ -75,7 +75,11 @@ export default function Login() {
                 Don't have an account? Sign Up
               </Link>
               <Box sx={{ mt: 1 }}>
-                <Link href="/forgot-password" variant="body2">
+                <Link 
+                  component="button" 
+                  variant="body2" 
+                  onClick={() => navigate('/forgot-password')}
+                >
                   Forgot Password?
                 </Link>
               </Box>

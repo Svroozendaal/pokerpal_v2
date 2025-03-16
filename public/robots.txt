@@ -2,5 +2,8 @@
 User-agent: *
 Allow: /
 
-# Sitemap location
-Sitemap: https://pokerpal.app/sitemap.xml
+# Google site verification
+google-site-verification: qYRsaupVlBAC3FTIl_WuR7VIGbgshRrZ_rJKuW7ad5Q
+
+# Sitemap
+Sitemap: https://pokerpal.online/sitemap.xml

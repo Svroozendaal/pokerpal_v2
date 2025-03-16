@@ -31,18 +31,29 @@ export default function GameView() {
           return;
         }
         const gameData = gameDoc.data();
-        setGame({
-          id: gameDoc.id,
-          ...gameData,
-          date: gameData.date.toDate(),
-          // Ensure the results array has the correct structure
-          results: gameData.settings.players.map(player => ({
+        
+        // Calculate player results with proper value formatting
+        const playerResults = gameData.settings.players.map(player => {
+          const startingValue = parseFloat(player.startStack) * parseFloat(gameData.settings.coinValue);
+          const endingValue = parseFloat(player.endStack) * parseFloat(gameData.settings.coinValue);
+          return {
             name: player.name,
             startStack: player.startStack,
             endStack: player.endStack,
-            result: parseFloat(player.endStack) - parseFloat(player.startStack)
-          })),
-          // Include payouts if they exist
+            startingValue,
+            endingValue,
+            result: endingValue - startingValue
+          };
+        });
+
+        setGame({
+          id: gameDoc.id,
+          title: gameData.title,
+          date: gameData.date.toDate(),
+          potValue: gameData.potValue,
+          currency: gameData.currency,
+          settings: gameData.settings,
+          playerResults,
           payouts: gameData.payouts || []
         });
       } catch (error) {
@@ -102,7 +113,7 @@ export default function GameView() {
           results={{
             title: game.title,
             date: game.date,
-            results: game.results,
+            playerResults: game.playerResults,
             payouts: game.payouts,
             settings: game.settings
           }}

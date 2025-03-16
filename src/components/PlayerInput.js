@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import { Grid, TextField, IconButton, Card, CardContent, Box } from '@mui/material';
 import RemoveIcon from '@mui/icons-material/Remove';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -9,14 +9,20 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
     startStack: player.startStack,
     endStack: player.endStack
   });
+  const timeoutRef = useRef(null);
 
   const handleStackChange = useCallback((field, value) => {
     setLocalValue(prev => ({ ...prev, [field]: value }));
-    // Only update parent after user stops typing for 500ms
-    const timeoutId = setTimeout(() => {
+    
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    // Set new timeout
+    timeoutRef.current = setTimeout(() => {
       handlePlayerChange(index, field, value);
     }, 500);
-    return () => clearTimeout(timeoutId);
   }, [index, handlePlayerChange]);
 
   const handleIncrement = useCallback((field) => {
@@ -33,77 +39,14 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
     handlePlayerChange(index, field, newValue);
   }, [index, localValue, buyInValue, handlePlayerChange]);
 
-  const StackInput = useCallback(({ field, label, value }) => (
-    <Box sx={{ position: 'relative' }}>
-      <TextField
-        label={label}
-        type="number"
-        value={localValue[field]}
-        onChange={(e) => handleStackChange(field, e.target.value)}
-        variant="outlined"
-        fullWidth
-        size="small"
-        sx={{
-          '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': {
-            WebkitAppearance: 'none',
-            margin: 0
-          },
-          '& input[type=number]': {
-            MozAppearance: 'textfield'
-          }
-        }}
-      />
-      <Box sx={{ 
-        position: 'absolute', 
-        right: 2, 
-        top: '50%', 
-        transform: 'translateY(-50%)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '2px',
-        pointerEvents: 'none'
-      }}>
-        <IconButton
-          size="small"
-          onClick={() => handleIncrement(field)}
-          sx={{ 
-            p: 0.3,
-            padding: '0px',
-            minWidth: '24px',
-            minHeight: '0px',
-            bgcolor: 'rgba(26, 38, 51, 0)',
-            borderRadius: '0%',
-            bgcolor: 'background.paper',
-            '&:hover': {
-              bgcolor: 'action.hover'
-            },
-            pointerEvents: 'auto'
-          }}
-        >
-          <KeyboardArrowUpIcon sx={{ fontSize: '1rem' }} />
-        </IconButton>
-        <IconButton
-          size="small"
-          onClick={() => handleDecrement(field)}
-          sx={{ 
-            p: 0.3,
-            padding: '0px',
-            minWidth: '24px',
-            minHeight: '0px',
-            bgcolor: 'rgba(26, 38, 51, 0)',
-            borderRadius: '0%',
-            bgcolor: 'background.paper',
-            '&:hover': {
-              bgcolor: 'action.hover'
-            },
-            pointerEvents: 'auto'
-          }}
-        >
-          <KeyboardArrowDownIcon sx={{ fontSize: '1rem' }} />
-        </IconButton>
-      </Box>
-    </Box>
-  ), [handleStackChange, handleIncrement, handleDecrement, localValue]);
+  // Clean up timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // Update local value when prop changes
   React.useEffect(() => {
@@ -113,48 +56,68 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
     });
   }, [player.startStack, player.endStack]);
 
+  const StackInput = useCallback(({ field, label }) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <TextField
+        label={label}
+        type="number"
+        value={localValue[field]}
+        onChange={(e) => handleStackChange(field, e.target.value)}
+        fullWidth
+        size="small"
+        inputProps={{
+          step: buyInValue,
+          min: 0
+        }}
+      />
+      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+        <IconButton
+          size="small"
+          onClick={() => handleIncrement(field)}
+          sx={{ padding: 0 }}
+        >
+          <KeyboardArrowUpIcon />
+        </IconButton>
+        <IconButton
+          size="small"
+          onClick={() => handleDecrement(field)}
+          sx={{ padding: 0 }}
+        >
+          <KeyboardArrowDownIcon />
+        </IconButton>
+      </Box>
+    </Box>
+  ), [localValue, handleStackChange, handleIncrement, handleDecrement, buyInValue]);
+
   return (
-    <Card sx={{ marginBottom: 0.5, boxShadow: 1 }}>
-      <CardContent sx={{ py: 0.5, px: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: -0.5, marginRight: -0.5 }}>
-          <IconButton 
-            size="small"
-            onClick={removePlayer}
-            color="secondary"
-            sx={{ p: 0.25 }}
-          >
-            <RemoveIcon fontSize="small" />
-          </IconButton>
-        </Box>
-        <Grid container spacing={1} alignItems="center">
-          <Grid item xs={12} md={6}>
+    <Card sx={{ mb: 2 }}>
+      <CardContent>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} sm={4}>
             <TextField
               label="Name"
               value={player.name}
-              placeholder={`Player ${index + 1}`}
               onChange={(e) => handlePlayerChange(index, 'name', e.target.value)}
-              variant="outlined"
               fullWidth
               size="small"
             />
           </Grid>
-          <Grid item xs={12} md={6}>
-            <Grid container spacing={1}>
-              <Grid item xs={6}>
-                <StackInput
-                  field="startStack"
-                  label="Starting Stack"
-                  value={player.startStack}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <StackInput
-                  field="endStack"
-                  label="Ending Stack"
-                  value={player.endStack}
-                />
-              </Grid>
-            </Grid>
+          <Grid item xs={12} sm={3}>
+            <StackInput
+              field="startStack"
+              label="Starting Stack"
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <StackInput
+              field="endStack"
+              label="Ending Stack"
+            />
+          </Grid>
+          <Grid item xs={12} sm={2}>
+            <IconButton onClick={() => removePlayer(index)} color="error">
+              <RemoveIcon />
+            </IconButton>
           </Grid>
         </Grid>
       </CardContent>

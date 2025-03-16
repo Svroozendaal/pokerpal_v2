@@ -22,13 +22,10 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
   const numberInputSx = {
     '& input[type=number]': {
       '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
-        opacity: 1,
-        position: 'absolute',
-        right: 4,
-        height: '100%',
-        width: 20,
-        cursor: 'pointer',
-      }
+        WebkitAppearance: 'none',
+        margin: 0
+      },
+      MozAppearance: 'textfield'
     }
   };
 
@@ -43,7 +40,6 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
         fullWidth
         size="small"
         inputProps={{
-          step: buyInValue,
           min: 0
         }}
         sx={numberInputSx}

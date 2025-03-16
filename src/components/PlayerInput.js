@@ -6,10 +6,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInValue }) {
   const handleStackChange = (field, value) => {
-    // Allow only numbers
-    if (value === '' || /^\d*$/.test(value)) {
-      handlePlayerChange(index, field, value);
-    }
+    // Only update if it's a valid number or empty
+    const newValue = value.replace(/[^\d]/g, '');
+    handlePlayerChange(index, field, newValue);
   };
 
   const handleIncrement = (field) => {
@@ -44,8 +43,7 @@ function PlayerInput({ player, index, handlePlayerChange, removePlayer, buyInVal
         fullWidth
         size="small"
         inputProps={{
-          inputMode: 'numeric',
-          pattern: '[0-9]*'
+          inputMode: 'numeric'
         }}
       />
       <Box sx={{ 

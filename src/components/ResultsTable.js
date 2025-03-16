@@ -26,7 +26,8 @@ function ResultsTable({
   const formatCurrency = (value) => {
     const absValue = Math.abs(value);
     const formattedValue = absValue.toFixed(2);
-    return value < 0 ? `-${currency.symbol}${formattedValue}` : `${currency.symbol}${formattedValue}`;
+    const symbol = currency?.symbol || '€';
+    return value < 0 ? `-${symbol}${formattedValue}` : `${symbol}${formattedValue}`;
   };
 
   return (
@@ -34,7 +35,7 @@ function ResultsTable({
       {showPotValue && (
         <Box sx={{ mb: 2 }}>
           <Typography variant="body2" sx={{ mb: 1 }}>
-            Total Pot Value: {currency.symbol}{potValue.toFixed(2)}
+            Total Pot Value: {formatCurrency(potValue)}
           </Typography>
         </Box>
       )}

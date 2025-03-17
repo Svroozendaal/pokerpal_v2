@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import Footer from './Footer';
+import GoogleAd from './GoogleAd';
 
 function AppContainer({ children }) {
   return (
@@ -22,6 +23,7 @@ function AppContainer({ children }) {
         }}
       >
         {children}
+        <GoogleAd />
       </Box>
       <Footer />
     </Box>

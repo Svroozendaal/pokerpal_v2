@@ -1,6 +1,6 @@
 {
   "short_name": "PokerPal",
-  "name": "PokerPal - Smart Poker Payout Calculator",
+  "name": "PokerPal - Poker Payout Calculator",
   "icons": [
     {
       "src": "images/Pokerpal_logo16.png",
@@ -10,6 +10,11 @@
     {
       "src": "images/Pokerpal_logo32.png",
       "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "images/Pokerpal_logo180.png",
+      "sizes": "180x180",
       "type": "image/png"
     },
     {
@@ -26,5 +31,6 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#0d1923",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "orientation": "portrait"
 }

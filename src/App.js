@@ -1,6 +1,6 @@
 // App.js
 import React, { useState, useEffect, Suspense, lazy, useCallback } from 'react';
-import { Typography, Button, Box } from '@mui/material';
+import { Typography, Button, Box, AppBar, Toolbar } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import AppContainer from './components/AppContainer';
 import SetupInputs from './components/SetupInputs';
@@ -24,6 +24,7 @@ import GameView from './components/GameView';
 import Admin from './components/Admin';
 import Terms from './components/Terms';
 import LazyLoad from './components/LazyLoad';
+import FAQ from './components/FAQ';
 
 // Lazy load components that aren't immediately needed
 const LazyGameView = lazy(() => import('./components/GameView'));
@@ -369,6 +370,7 @@ function App() {
                 <LazyAdmin />
               </LazyLoad>
             } />
+            <Route path="/faq" element={<FAQ />} />
           </Routes>
         </AuthProvider>
       </Router>

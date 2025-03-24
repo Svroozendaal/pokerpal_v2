@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Home Page -->
   <url>
-    <loc>https://pokerpal.online/</loc>
+    <loc>https://www.pokerpal.online/</loc>
     <lastmod>2024-03-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -27,7 +27,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://pokerpal.online/history</loc>
+    <loc>https://www.pokerpal.online/history</loc>
     <lastmod>2024-03-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -35,7 +35,7 @@
 
   <!-- Legal and Info Pages -->
   <url>
-    <loc>https://pokerpal.online/terms</loc>
+    <loc>https://www.pokerpal.online/terms</loc>
     <lastmod>2024-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>

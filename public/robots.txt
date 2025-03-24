@@ -6,4 +6,4 @@ Allow: /
 google-site-verification: qYRsaupVlBAC3FTIl_WuR7VIGbgshRrZ_rJKuW7ad5Q
 
 # Sitemap
-Sitemap: https://pokerpal.online/sitemap.xml
+Sitemap: https://www.pokerpal.online/sitemap.xml

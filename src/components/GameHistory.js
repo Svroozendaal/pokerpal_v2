@@ -57,18 +57,37 @@ export default function GameHistory() {
           .map(doc => {
             const data = doc.data();
             // Calculate player results with proper value formatting
-            const playerResults = data.settings.players.map((player, index) => {
-              const startingValue = parseFloat(player.startStack) * parseFloat(data.settings.coinValue);
-              const endingValue = parseFloat(player.endStack) * parseFloat(data.settings.coinValue);
-              return {
+            let playerResults;
+            
+            // Handle both old and new data structures
+            if (data.settings && data.settings.players) {
+              // New data structure
+              playerResults = data.settings.players.map((player, index) => {
+                const startingValue = parseFloat(player.startStack) * parseFloat(data.settings.coinValue);
+                const endingValue = parseFloat(player.endStack) * parseFloat(data.settings.coinValue);
+                return {
+                  name: player.name || `Player ${index + 1}`,
+                  startStack: player.startStack,
+                  endStack: player.endStack,
+                  startingValue,
+                  endingValue,
+                  result: endingValue - startingValue
+                };
+              });
+            } else if (data.results) {
+              // Old data structure
+              playerResults = data.results.map((player, index) => ({
                 name: player.name || `Player ${index + 1}`,
                 startStack: player.startStack,
                 endStack: player.endStack,
-                startingValue,
-                endingValue,
-                result: endingValue - startingValue
-              };
-            });
+                startingValue: player.startStack,
+                endingValue: player.endStack,
+                result: player.result
+              }));
+            } else {
+              console.error('Invalid game data structure:', data);
+              return null;
+            }
 
             return {
               id: doc.id,
@@ -76,11 +95,16 @@ export default function GameHistory() {
               date: data.date.toDate(),
               potValue: data.potValue,
               currency: data.currency,
-              settings: data.settings,
+              settings: data.settings || {
+                coinValue: 1,
+                buyInValue: 0,
+                players: playerResults
+              },
               playerResults,
               payouts: data.payouts || []
             };
           })
+          .filter(game => game !== null) // Remove any invalid games
           .sort((a, b) => b.date - a.date);
         
         setGames(gamesData);

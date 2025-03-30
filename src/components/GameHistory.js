@@ -61,7 +61,7 @@ export default function GameHistory() {
               const startingValue = parseFloat(player.startStack) * parseFloat(data.settings.coinValue);
               const endingValue = parseFloat(player.endStack) * parseFloat(data.settings.coinValue);
               return {
-                name: player.name,
+                name: player.name || `Player ${index + 1}`,
                 startStack: player.startStack,
                 endStack: player.endStack,
                 startingValue,

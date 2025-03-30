@@ -10,16 +10,13 @@ import {
   Typography,
   Box,
   useTheme,
-  useMediaQuery,
-  Card,
-  CardContent,
-  Grid
+  useMediaQuery
 } from '@mui/material';
 
 function ResultsTable({ 
   results, 
   potValue, 
-  currency,
+  currency = { symbol: '€', code: 'EUR' },
   showPotValue = true,
   elevation = 0
 }) {
@@ -29,65 +26,100 @@ function ResultsTable({
   const formatCurrency = (value) => {
     const absValue = Math.abs(value);
     const formattedValue = absValue.toFixed(2);
-    const symbol = currency?.symbol || '$';
+    const symbol = currency?.symbol || '€';
     return value < 0 ? `-${symbol}${formattedValue}` : `${symbol}${formattedValue}`;
   };
 
   return (
-    <Card elevation={elevation} sx={{ mb: 2 }}>
-      <CardContent>
-        <Grid container spacing={2}>
-          {/* Header */}
-          <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom>
-              Results
-            </Typography>
-          </Grid>
+    <>
+      {showPotValue && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            Total Pot Value: {formatCurrency(potValue)}
+          </Typography>
+        </Box>
+      )}
 
-          {/* Pot Value */}
-          {showPotValue && (
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Total Pot: {formatCurrency(potValue)}
-              </Typography>
-            </Grid>
-          )}
-
-          {/* Results Table */}
-          <Grid item xs={12}>
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Player</TableCell>
-                    <TableCell align="right">Starting Value</TableCell>
-                    <TableCell align="right">Ending Value</TableCell>
-                    <TableCell align="right">Result</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {results.playerResults.map((player, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{player.name}</TableCell>
-                      <TableCell align="right">{formatCurrency(player.startingValue)}</TableCell>
-                      <TableCell align="right">{formatCurrency(player.endingValue)}</TableCell>
-                      <TableCell 
-                        align="right"
-                        sx={{ 
-                          color: player.result > 0 ? 'success.main' : player.result < 0 ? 'error.main' : 'text.primary'
-                        }}
-                      >
-                        {formatCurrency(player.result)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Grid>
-        </Grid>
-      </CardContent>
-    </Card>
+      <TableContainer component={Paper} elevation={elevation}>
+        <Table 
+          size="small" 
+          sx={{ 
+            '& td, & th': { 
+              fontSize: '0.875rem',
+              px: isMobile ? 1 : 2,
+              py: isMobile ? 0.5 : 1
+            }
+          }}
+        >
+          <TableHead>
+            <TableRow>
+              <TableCell 
+                sx={{ 
+                  py: isMobile ? 0.5 : 1,
+                  bgcolor: 'action.hover',
+                  fontWeight: 600,
+                  borderBottom: 2,
+                  width: isMobile ? '35%' : '35%'
+                }}
+              >
+                Name
+              </TableCell>
+              <TableCell 
+                sx={{ 
+                  py: isMobile ? 0.5 : 1,
+                  bgcolor: 'action.hover',
+                  fontWeight: 600,
+                  borderBottom: 2,
+                  width: isMobile ? '20%' : '20%'
+                }}
+              >
+                Starting
+              </TableCell>
+              <TableCell 
+                sx={{ 
+                  py: isMobile ? 0.5 : 1,
+                  bgcolor: 'action.hover',
+                  fontWeight: 600,
+                  borderBottom: 2,
+                  width: isMobile ? '20%' : '20%'
+                }}
+              >
+                Ending
+              </TableCell>
+              <TableCell 
+                sx={{ 
+                  py: isMobile ? 0.5 : 1,
+                  bgcolor: 'action.hover',
+                  fontWeight: 600,
+                  borderBottom: 2,
+                  width: isMobile ? '25%' : '25%'
+                }}
+              >
+                Result
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {results.playerResults.map((player, index) => (
+              <TableRow key={index}>
+                <TableCell sx={{ py: isMobile ? 0.5 : 1 }}>{player.name}</TableCell>
+                <TableCell sx={{ py: isMobile ? 0.5 : 1 }}>{formatCurrency(player.startingValue)}</TableCell>
+                <TableCell sx={{ py: isMobile ? 0.5 : 1 }}>{formatCurrency(player.endingValue)}</TableCell>
+                <TableCell 
+                  sx={{ 
+                    py: isMobile ? 0.5 : 1,
+                    color: player.result > 0 ? 'success.main' : player.result < 0 ? 'error.main' : 'text.primary',
+                    fontWeight: player.result !== 0 ? 500 : 400
+                  }}
+                >
+                  {player.result > 0 ? '+' : ''}{formatCurrency(player.result)}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
   );
 }
 

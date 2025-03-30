@@ -10,10 +10,10 @@ import ResultsDialog from './components/ResultsDialog';
 import { darkTheme, lightTheme } from './theme';
 import ResultsDisplay from './components/ResultsDisplay';
 import Navigation from './components/Navigation';
-import { Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { useAuth } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import ForgotPassword from './components/ForgotPassword';
@@ -325,13 +325,11 @@ function App() {
     calculatePayouts,
     handleCurrencyChange,
     totalStartingStack,
-    setTotalStartingStack,
     totalEndingStack,
-    setTotalEndingStack,
     showSaveDialog,
     setShowSaveDialog,
     hasUnsavedChanges,
-    setHasUnsavedChanges,
+    onNewGame: handleNewGame,
     gameTitle,
     setGameTitle,
   };
@@ -339,68 +337,43 @@ function App() {
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
       <CssBaseline />
-      <Navigation isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
-      <AppContainer>
-        <Routes>
-          <Route path="/" element={
-            <MainContent
-              isDarkMode={isDarkMode}
-              setIsDarkMode={setIsDarkMode}
-              players={players}
-              setPlayers={setPlayers}
-              coinValue={coinValue}
-              setCoinValue={setCoinValue}
-              buyInValue={buyInValue}
-              setBuyInValue={setBuyInValue}
-              results={results}
-              setResults={setResults}
-              potValue={potValue}
-              setPotValue={setPotValue}
-              discrepancy={discrepancy}
-              setDiscrepancy={setDiscrepancy}
-              showDiscrepancyModal={showDiscrepancyModal}
-              setShowDiscrepancyModal={setShowDiscrepancyModal}
-              totalStartingStack={totalStartingStack}
-              setTotalStartingStack={setTotalStartingStack}
-              totalEndingStack={totalEndingStack}
-              setTotalEndingStack={setTotalEndingStack}
-              showResultsDialog={showResultsDialog}
-              setShowResultsDialog={setShowResultsDialog}
-              selectedCurrency={selectedCurrency}
-              setSelectedCurrency={setSelectedCurrency}
-              showSaveDialog={showSaveDialog}
-              setShowSaveDialog={setShowSaveDialog}
-              hasUnsavedChanges={hasUnsavedChanges}
-              setHasUnsavedChanges={setHasUnsavedChanges}
-              gameTitle={gameTitle}
-              setGameTitle={setGameTitle}
-              checkStackDiscrepancy={checkStackDiscrepancy}
-              calculatePayouts={calculatePayouts}
-            />
-          } />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/history" element={
-            <Suspense fallback={<LazyLoad />}>
-              <LazyGameHistory />
-            </Suspense>
-          } />
-          <Route path="/account" element={<Account />} />
-          <Route path="/game/:gameId" element={
-            <Suspense fallback={<LazyLoad />}>
-              <LazyGameView />
-            </Suspense>
-          } />
-          <Route path="/admin" element={
-            <Suspense fallback={<LazyLoad />}>
-              <LazyAdmin />
-            </Suspense>
-          } />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/faq" element={<FAQ />} />
-        </Routes>
-      </AppContainer>
+      <Router>
+        <AuthProvider>
+          <Navigation isDarkMode={isDarkMode} toggleTheme={() => setIsDarkMode(!isDarkMode)} />
+          <Routes>
+            <Route path="/" element={
+              <AppContainer>
+                <MainContent 
+                  isDarkMode={isDarkMode} 
+                  setIsDarkMode={setIsDarkMode}
+                  {...mainProps}
+                />
+              </AppContainer>
+            } />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/history" element={
+              <LazyLoad>
+                <LazyGameHistory />
+              </LazyLoad>
+            } />
+            <Route path="/account" element={<Account />} />
+            <Route path="/game/:gameId" element={
+              <LazyLoad>
+                <LazyGameView />
+              </LazyLoad>
+            } />
+            <Route path="/admin" element={
+              <LazyLoad>
+                <LazyAdmin />
+              </LazyLoad>
+            } />
+            <Route path="/faq" element={<FAQ />} />
+          </Routes>
+        </AuthProvider>
+      </Router>
     </ThemeProvider>
   );
 }

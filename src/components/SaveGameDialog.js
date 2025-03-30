@@ -83,11 +83,7 @@ export default function SaveGameDialog({
         date: serverTimestamp(),
         userId: currentUser.uid,
         potValue: Number(potValue),
-        currency: {
-          code: currency.code,
-          symbol: currency.symbol,
-          name: currency.name
-        },
+        currency,
         results: results.playerResults.map(player => ({
           ...player,
           result: Number(player.result)
@@ -96,7 +92,7 @@ export default function SaveGameDialog({
         settings: {
           coinValue: Number(coinValue),
           buyInValue: Number(buyInValue),
-          players: players.map((player, index) => ({
+          players: players.map(player => ({
             name: player.name || `Player ${index + 1}`,
             startStack: Number(player.startStack) || 0,
             endStack: Number(player.endStack) || 0

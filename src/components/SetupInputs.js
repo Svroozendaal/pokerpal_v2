@@ -44,10 +44,11 @@ function SetupInputs({
   hasUnsavedChanges,
   gameTitle,
   setGameTitle,
+  selectedCurrency,
+  onCurrencyChange,
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]);
   const [newGameDialogOpen, setNewGameDialogOpen] = useState(false);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
@@ -163,7 +164,7 @@ function SetupInputs({
                         value={selectedCurrency.code}
                         onChange={(e) => {
                           const currency = currencies.find(c => c.code === e.target.value);
-                          setSelectedCurrency(currency);
+                          onCurrencyChange(currency);
                         }}
                         size="small"
                         fullWidth

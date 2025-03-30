@@ -63,7 +63,21 @@ function MainContent({ isDarkMode, setIsDarkMode, ...props }) {
                   height: 'fit-content',
                   zIndex: 1
                 }}>
-                  <SetupInputs {...props} />
+                  <SetupInputs
+                    coinValue={props.coinValue}
+                    setCoinValue={props.setCoinValue}
+                    buyInValue={props.buyInValue}
+                    setBuyInValue={props.setBuyInValue}
+                    totalStartingStack={props.totalStartingStack}
+                    totalEndingStack={props.totalEndingStack}
+                    calculatePayouts={props.calculatePayouts}
+                    onNewGame={props.onNewGame}
+                    hasUnsavedChanges={props.hasUnsavedChanges}
+                    gameTitle={props.gameTitle}
+                    setGameTitle={props.setGameTitle}
+                    selectedCurrency={props.selectedCurrency}
+                    onCurrencyChange={props.onCurrencyChange}
+                  />
                 </Box>
               </Grid>
 
@@ -332,6 +346,7 @@ function App() {
     onNewGame: handleNewGame,
     gameTitle,
     setGameTitle,
+    onCurrencyChange: handleCurrencyChange,
   };
 
   return (

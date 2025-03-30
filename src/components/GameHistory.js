@@ -94,7 +94,11 @@ export default function GameHistory() {
               title: data.title,
               date: data.date.toDate(),
               potValue: data.potValue,
-              currency: data.currency,
+              currency: data.currency || {
+                symbol: '€',
+                code: 'EUR',
+                name: 'Euro'
+              },
               settings: data.settings || {
                 coinValue: 1,
                 buyInValue: 0,

@@ -83,7 +83,11 @@ export default function SaveGameDialog({
         date: serverTimestamp(),
         userId: currentUser.uid,
         potValue: Number(potValue),
-        currency,
+        currency: {
+          code: currency.code,
+          symbol: currency.symbol,
+          name: currency.name
+        },
         results: results.playerResults.map(player => ({
           ...player,
           result: Number(player.result)

@@ -92,7 +92,7 @@ export default function SaveGameDialog({
         settings: {
           coinValue: Number(coinValue),
           buyInValue: Number(buyInValue),
-          players: players.map(player => ({
+          players: players.map((player, index) => ({
             name: player.name || `Player ${index + 1}`,
             startStack: Number(player.startStack) || 0,
             endStack: Number(player.endStack) || 0

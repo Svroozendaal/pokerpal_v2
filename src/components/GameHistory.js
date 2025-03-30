@@ -57,7 +57,7 @@ export default function GameHistory() {
           .map(doc => {
             const data = doc.data();
             // Calculate player results with proper value formatting
-            const playerResults = data.settings.players.map(player => {
+            const playerResults = data.settings.players.map((player, index) => {
               const startingValue = parseFloat(player.startStack) * parseFloat(data.settings.coinValue);
               const endingValue = parseFloat(player.endStack) * parseFloat(data.settings.coinValue);
               return {

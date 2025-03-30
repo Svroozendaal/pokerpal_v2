@@ -3,16 +3,18 @@ import ReactDOM from 'react-dom/client'; // Correct import for React 18
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { ThemeProvider } from '@mui/material/styles';
-import { darkTheme } from './theme';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 
 // Use createRoot for React 18
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={darkTheme}>
-      <App />
-    </ThemeProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
 

@@ -5,7 +5,9 @@ import {
   Typography,
   Box,
   Divider,
+  IconButton,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { useAuth } from '../contexts/AuthContext';
 import ShareWidget from './ShareWidget';
 import ResultsTable from './ResultsTable';
@@ -28,7 +30,7 @@ function ResultsDisplay({
   return (
     <Card sx={{ position: 'relative', overflow: 'visible' }}>
       <CardContent sx={{ py: 2 }}>
-        {/* Logo */}
+        {/* Logo - moved to top-left */}
         <Box 
           component="img"
           src={process.env.PUBLIC_URL + '/images/Pokerpal_logo512.png'}
@@ -36,7 +38,7 @@ function ResultsDisplay({
           sx={{
             position: 'absolute',
             top: 16,
-            right: 16,
+            left: 16,
             width: 48,
             height: 48,
             objectFit: 'contain'
@@ -46,6 +48,24 @@ function ResultsDisplay({
             e.target.style.display = 'none';
           }}
         />
+
+        {/* Close Button - added to top-right */}
+        <IconButton
+          onClick={onClose}
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            color: 'text.secondary',
+            '&:hover': {
+              color: 'text.primary',
+              backgroundColor: 'action.hover',
+            },
+          }}
+          aria-label="close"
+        >
+          <CloseIcon />
+        </IconButton>
 
         {/* Title Section */}
         <Box sx={{ mb: 4, textAlign: 'center' }}>

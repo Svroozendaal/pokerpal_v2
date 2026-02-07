@@ -1,0 +1,484 @@
+LEGACY IMPORT (WordPress / Ultimate Member) - not relevant for PokerPal
+
+Below is **one single, extensive, “AI-agent-ready” explanation** of both flows. It’s written like a spec / playbook: **what triggers what**, **in what order**, **which hooks are the stable tap-in points**, and **how UM differs from core WP**. You can paste this into your codebase (docs / comments / agent prompt) as-is.
+
+---
+
+# Registration Flows Spec: WordPress Core vs Ultimate Member (UM)
+
+## Goal
+
+Describe, step-by-step, how a user registration request is processed in:
+
+1. **WordPress core registration** (`wp-login.php?action=register`)
+2. **Ultimate Member registration** (front-end UM form via shortcode)
+
+Include “tap-in points” (actions/filters, often called “webhooks”) that an integration layer (e.g. custom plugin, CRM sync, logging, access control) can use.
+
+---
+
+## Definitions / Shared Concepts
+
+### WordPress Hooks
+
+* **Actions**: `do_action('hook_name', ...)` (fire-and-forget event)
+* **Filters**: `apply_filters('hook_name', $value, ...)` (modify a value)
+
+### “Registration” vs “User creation”
+
+* **Registration (front-end)**: A visitor submits a form that results in a user being created.
+* **User creation (general)**: A user can be created via many paths: admin UI, WP REST API, WP-CLI, other plugins. The general WP “user created” signal is **`user_register`**.
+
+### Important data locations
+
+* `wp_users`: core user row (user_login, user_email, user_pass hash, etc.)
+* `wp_usermeta`: key/value metadata (including plugin-specific fields, UM fields, etc.)
+
+---
+
+# Part 1 — Core WordPress Registration Flow
+
+## Entry point
+
+The core “default registration page” is:
+
+* `wp-login.php?action=register`
+
+This route renders a basic form (typically username + email). The internal logic then validates and creates the user.
+
+## Step-by-step sequence
+
+### 1) Form render phase
+
+1. Visitor loads `wp-login.php?action=register`.
+2. WordPress outputs the registration form HTML.
+3. During output, WP fires:
+
+   * **Action: `register_form`**
+
+     * Intended use: print extra form fields in the UI.
+
+**Important:** printing fields does not automatically validate or save them. Validation and saving must be done using later hooks.
+
+### 2) Submit phase: early handling
+
+4. Visitor submits the form with POST.
+5. WordPress reads submitted fields and starts processing.
+6. WP fires:
+
+   * **Action: `register_post`**
+
+     * Intended use: observe / lightly adjust handling (WP explicitly indicates you should not do custom validation here—use `registration_errors`).
+
+### 3) Validation phase
+
+7. WordPress validates username/email and runs validation filters.
+8. WP fires:
+
+   * **Filter: `registration_errors`**
+
+     * This is the canonical place to add custom validation.
+     * If you add errors to the returned `WP_Error`, WP stops and shows errors on the form.
+
+### 4) User creation phase (database insert)
+
+9. If there are no validation errors, WP proceeds to create the user.
+10. WordPress ultimately inserts the user via `wp_insert_user()` (or a wrapper that calls it).
+11. Just before insertion, WP can fire:
+
+* **Filter: `wp_pre_insert_user_data`**
+
+  * Last chance to modify *core user row fields* (wp_users data), not arbitrary usermeta.
+
+12. WP inserts into `wp_users`, sets password hash, and writes some metadata.
+
+### 5) Post-create hooks and notifications
+
+13. After user creation, WP fires:
+
+* **Action: `user_register`**
+
+  * General “user created” hook for any user creation path.
+  * Often used to save custom meta and trigger integrations.
+  * Note: WP warns not all meta is guaranteed saved at this exact moment depending on how meta is written; it’s common to save your own meta here.
+
+14. WP may also fire:
+
+* **Action: `register_new_user`**
+
+  * Specific to the `register_new_user()` registration path.
+
+15. WordPress sends notification emails (admin and user) via internal notification functions. Control/customize with:
+
+* `wp_send_new_user_notification_to_admin` (filter)
+* `wp_send_new_user_notification_to_user` (filter)
+* `wp_new_user_notification_email_admin` (filter)
+* `wp_new_user_notification_email` (filter)
+
+### 6) Completion phase
+
+16. WP shows a “check email” message or redirects to login depending on configuration.
+
+## Core WP “best tap-in points” summary
+
+* **Add extra fields UI**: `register_form`
+* **Validate/block registration**: `registration_errors`
+* **Modify user row fields pre-insert**: `wp_pre_insert_user_data`
+* **React to any new user**: `user_register`
+* **Customize notification sending/content**: `wp_send_new_user_notification_*`, `wp_new_user_notification_email*`
+
+---
+
+# Part 2 — Ultimate Member Registration Flow
+
+## High-level difference vs core WP
+
+Ultimate Member (UM) runs a **front-end form engine** and wraps user creation with:
+
+* Form definition (per form ID) and field renderer
+* Centralized sanitation/normalization of submitted form payload
+* Nonce rules specific to UM register flow
+* A multi-stage validation pipeline (general + registration-specific + field-level)
+* Role resolution rules (UM settings + per-form override + filters)
+* Post-insert “enrichment” steps (save files, set full name, set UM-specific meta)
+* “Save registration details” phase with before/after hooks
+* A “registration complete” phase that triggers notifications and redirects
+* Status workflows (approved / pending / awaiting email confirmation / etc.)
+* Optional auto-login branch
+
+**Crucial point:** UM still ends up creating a **normal WordPress user**, so WordPress core hooks like `user_register` can still run. UM-specific hooks are better if you need UM form fields reliably saved and want status-aware behavior.
+
+---
+
+## UM step-by-step sequence (detailed)
+
+### A) Form load/render phase (shortcode driven)
+
+1. Visitor opens a page that contains a UM registration shortcode (e.g. `[ultimate_member form_id="X"]`).
+
+2. UM resolves the form configuration and mode (“register”).
+
+3. UM fires pre-load hooks:
+
+   * **Action: `um_before_form_is_loaded`**
+   * **Action: `um_before_{mode}_form_is_loaded`** (mode=register → `um_before_register_form_is_loaded`)
+     Purpose: adjust shortcode args, form selection, preconditions.
+
+4. UM renders fields. You can add elements around fields using template hooks. A common integration pattern is adding hidden fields:
+
+   * **Action: `um_after_register_fields`**
+     Purpose: inject hidden fields or extra UI without editing templates.
+
+### B) Submit start phase
+
+5. Visitor submits the UM registration form (POST).
+6. UM fires:
+
+   * **Action: `um_before_submit_form_post`**
+     Purpose: earliest submit interception for logging or pre-processing.
+
+### C) Submitted data normalization/sanitization
+
+7. UM reads `$_POST` and normalizes/sanitizes it into its internal “submitted data” array.
+8. UM fires:
+
+   * **Filter: `um_submit_form_data`**
+     Purpose: modify the submitted payload (transform values, add derived fields, remove keys, etc.).
+     This is one of the best places to ensure your integration sees consistent data.
+
+### D) Nonce and security checks (registration-specific)
+
+9. UM evaluates whether to verify the registration nonce and what to do if it fails.
+10. UM exposes:
+
+* **Filter: `um_register_allow_nonce_verification`**
+* **Filter: `um_register_invalid_nonce_redirect_url`**
+  Purpose: control nonce behavior and invalid nonce redirect.
+
+### E) Validation pipeline
+
+UM validation is multi-layered. Conceptually:
+
+11. UM enters “validation mode” and fires the general validation layer:
+
+* **Action: `um_submit_form_errors_hook`**
+
+12. UM enters registration-specific validation:
+
+* **Action: `um_submit_form_errors_hook__registration`**
+
+13. UM runs per-field validation:
+
+* **Action: `um_submit_form_errors_hook_`**
+
+14. If any validation layer adds errors, UM stops and returns errors to the form UI.
+
+**Integration guidance:**
+If your goal is “block registration if condition X”, hook into the registration-specific / field-level validation actions and add errors there. This is UM’s equivalent to WP’s `registration_errors`.
+
+### F) Register handler starts (mode submit)
+
+15. If validation passes, UM triggers the submit-mode action:
+
+* **Action: `um_submit_form_{mode}`**
+  For registration: effectively the register submit handler is invoked.
+
+This step is the “transition” from validation to actually creating the user.
+
+### G) Role resolution and WordPress user creation
+
+16. UM determines the WordPress role for the new user using:
+
+* UM settings default role
+* Optional per-form “assign role”
+* **Filter: `um_registration_user_role`** (final override point)
+
+17. UM creates the user as a real WordPress account, typically by calling WordPress APIs that lead to `wp_insert_user()` and writing usermeta.
+
+**Important:**
+
+* At this moment, core WP hooks like `wp_pre_insert_user_data` and `user_register` may also fire because a WP user is being created.
+
+### H) Post-insert enrichment (UM-specific)
+
+18. After the WP user is inserted, UM fires:
+
+* **Action: `um_registration_set_extra_data`**
+  UM’s own internal tasks often happen here (e.g. saving registration files, setting “full name”, extra UM data).
+  This is a strong place to do early post-create augmentation if you need access to user_id + submitted payload.
+
+### I) “Save registration details” phase (wrap hooks)
+
+19. UM saves the full set of UM registration fields/meta to the user.
+20. UM fires:
+
+* **Action: `um_before_save_registration_details`**
+
+21. UM writes the registration details (usually usermeta).
+22. UM fires:
+
+* **Action: `um_after_save_registration_details`**
+
+**Integration guidance:**
+If you need “all UM fields are definitely persisted before I run”, `um_after_save_registration_details` is usually the best reliability point.
+
+### J) UM “user registered” event
+
+23. UM fires:
+
+* **Action: `um_user_register`**
+  Meaning: UM considers the user registered and its post-insert workflows have run.
+
+### K) Registration completion: notifications + redirect logic
+
+24. UM fires:
+
+* **Action: `um_registration_complete`**
+  UM uses this stage to:
+* send UM registration notifications
+* execute redirect logic (UM’s redirect handler is typically hooked at a later priority; so run your logic at default priority <100 if you need to run before redirect)
+
+### L) Status-specific completion hook
+
+25. UM assigns a registration status (approved, pending, awaiting email confirmation, etc.).
+26. UM fires:
+
+* **Action: `um_post_registration_{status}_hook`**
+  This is the best place for status-aware integration triggers.
+
+### M) Optional auto-login branch
+
+27. If UM auto-login is enabled and the status path permits it, UM logs the user in.
+28. UM fires:
+
+* **Action: `um_registration_after_auto_login`**
+
+### N) Redirect/message customization
+
+29. UM determines final redirect/message for the status flow.
+30. UM allows override:
+
+* **Filter: `um_registration_show_message_redirect_url`**
+
+31. UM redirects or shows a message view.
+
+---
+
+## UM “best tap-in points” summary (what to hook for common goals)
+
+### Modify/normalize incoming form data
+
+* `um_submit_form_data` (filter)
+
+### Block registration / add validation
+
+* `um_submit_form_errors_hook__registration` (action)
+* `um_submit_form_errors_hook_` (action)
+
+### Change role assignment
+
+* `um_registration_user_role` (filter)
+
+### React right after WP user exists (but before all UM meta is guaranteed saved)
+
+* `um_registration_set_extra_data` (action)
+* (also WP `user_register` may fire, but it’s not UM-specific)
+
+### React after UM fields/meta are saved (most reliable for UM custom fields)
+
+* `um_after_save_registration_details` (action)
+
+### React when UM is fully complete (good for external webhooks + logging)
+
+* `um_registration_complete` (action)
+* If status matters: `um_post_registration_{status}_hook` (action)
+
+### React after auto-login (if enabled)
+
+* `um_registration_after_auto_login` (action)
+
+### Override redirect destination
+
+* `um_registration_show_message_redirect_url` (filter)
+
+---
+
+# Cross-flow Comparison: Core WP vs UM
+
+## What is “the same” underneath
+
+* Both ultimately create a **WordPress user** in `wp_users` and may write `wp_usermeta`.
+* Therefore core WP hooks like `user_register` can be triggered by either flow.
+
+## What UM adds on top
+
+* Form config and field rendering not tied to wp-login.php
+* Submit normalization pipeline (`um_submit_form_data`)
+* Multi-stage validation pipeline (general + registration-specific + per-field)
+* Role resolution rules (settings + per-form + filter)
+* Post-insert enrichment and a dedicated “save registration details” phase
+* Registration status workflows and status-specific hooks
+* UM-specific notifications + redirects + optional auto-login
+
+## Choosing the right hook for integrations (rule of thumb)
+
+* If you want **all new users from anywhere**: use WP `user_register` (but you may need additional logic if you depend on plugin-specific meta timing).
+* If you want **UM registrations specifically** and need **UM field data**: use `um_after_save_registration_details` or `um_registration_complete`.
+* If you want **status-aware** behavior: use `um_post_registration_{status}_hook`.
+
+---
+
+# Implementation guidance for an AI agent (how to “tap into it” safely)
+
+## If building a “Registration Integration Layer” plugin/snippet:
+
+1. Decide what you’re reacting to:
+
+   * any new WP user → hook `user_register`
+   * UM registration only → hook `um_registration_complete`
+   * UM registration with guaranteed UM meta → hook `um_after_save_registration_details`
+   * UM status-specific → hook `um_post_registration_{status}_hook`
+
+2. If you need to block registrations:
+
+   * WP core route: `registration_errors`
+   * UM route: `um_submit_form_errors_hook__registration`
+
+3. If you need submitted field values:
+
+   * UM: prefer `$submitted` passed to UM hooks or read UM’s stored usermeta after `um_after_save_registration_details`
+   * WP core: any extra fields you printed in `register_form` must be read from `$_POST` and saved manually (commonly in `user_register`).
+
+4. If you are calling external HTTP webhooks:
+
+   * Use `wp_remote_post()` with short timeouts.
+   * Avoid blocking the request too long; consider asynchronous patterns if needed (WP cron, Action Scheduler, queue table), but only if you truly need it.
+
+5. Be careful about double-firing:
+
+   * UM registration can trigger both UM hooks **and** WP `user_register`. If you attach to both, dedupe using a meta flag like `did_webhook_sync=1` or check if the request originated from UM (e.g., presence of UM form markers in submitted payload).
+
+---
+
+If you want, paste the following and I’ll tailor it to your actual setup with **your exact UM settings** (approval vs email activation vs auto-login) and the best single “integration hook”:
+
+* UM settings: email activation? admin review? auto-login enabled?
+* Which extra fields matter (ACF / UM custom fields)?
+* What you want to trigger (HubSpot? MailerLite? Slack? Zapier?)
+
+
+
+
+
+Wordpress registration flow
+flowchart TD
+  A([Visitor opens wp-login.php?action=register]) --> B[Render default registration form]
+  B -->|do_action: register_form| B1[Add extra fields UI]
+  B --> C[User submits POST (username/email)]
+  
+  C --> D[Core normalizes input + basic checks]
+  D -->|do_action: register_post| D1[Handle POST data (not validation)]
+  D -->|apply_filters: registration_errors| E{Any validation errors?}
+  E -->|Yes| X[Show errors on form] --> Z([End])
+  
+  E -->|No| F[Create user via register_new_user()]
+  F --> G[wp_create_user()/wp_insert_user()]
+  G -->|apply_filters: wp_pre_insert_user_data| G1[Alter wp_users fields before insert]
+  G --> H[(DB: insert wp_users + usermeta)]
+  
+  H -->|do_action: user_register| I[Post-create hook (save custom meta, integrations)]
+  H -->|do_action: register_new_user| J[Registration recorded event]
+  
+  I --> K[Send notification emails (wp_new_user_notification / wp_send_new_user_notifications)]
+  K --> L[Redirect / show “check email” / login step]
+  L --> Z([End])
+
+
+
+Ultimate member registration flowchart
+
+
+flowchart TD
+  A([Visitor opens UM registration page]) --> B[UM shortcode renders registration form]
+  B -->|do_action: um_before_form_is_loaded| B1[Adjust shortcode args / preconditions]
+  B -->|do_action: um_before_{mode}_form_is_loaded (mode=register)| B2[Mode-specific pre-load]
+  B --> C[Render registration fields]
+  C -->|hook: um_after_register_fields| C1[Optional: inject hidden fields]
+  
+  C --> D[User submits POST to UM]
+  D -->|do_action: um_before_submit_form_post| E[Pre-submit interception]
+  E -->|apply_filters: um_submit_form_data| F[UM unslash + sanitize + normalize submitted payload]
+  
+  F --> G[Nonce/security decision]
+  G -->|apply_filters: um_register_allow_nonce_verification| G1[Allow/deny nonce verification]
+  G -->|if invalid| G2[Redirect URL via um_register_invalid_nonce_redirect_url]
+  G --> H[UM validation pipeline]
+  
+  H -->|do_action: um_submit_form_errors_hook| H0[General UM form validation layer]
+  H0 -->|do_action: um_submit_form_errors_hook__registration| H1[Registration-specific validation]
+  H1 -->|do_action: um_submit_form_errors_hook_| H2[Field validation runner]
+  
+  H2 --> I{Any UM form errors?}
+  I -->|Yes| X[Return errors to form UI] --> Z([End])
+  
+  I -->|No| J[Submit mode handler]
+  J -->|do_action: um_submit_form_{mode} (register => um_submit_form_register)| K[UM register handler begins]
+  
+  K -->|apply_filters: um_registration_user_role| L[Resolve user role]
+  L --> M[Create WordPress user (wp_insert_user)]
+  M --> N[(DB: insert wp_users + usermeta)]
+  
+  N -->|do_action: um_registration_set_extra_data| O[Save files / set full name / extra data]
+  O -->|do_action: um_before_save_registration_details| P[Before saving UM registration details]
+  P --> Q[UM saves all registration details/meta]
+  Q -->|do_action: um_after_save_registration_details| R[After saving UM registration details]
+  
+  R -->|do_action: um_user_register| S[UM “user registered” event]
+  S -->|do_action: um_registration_complete| T[UM complete: notifications + status redirect handler]
+  
+  T -->|do_action: um_post_registration_{status}_hook| U[Status-specific event: approved/pending/checkmail]
+  U -->|optional| V[Auto-login path]
+  V -->|do_action: um_registration_after_auto_login| W[After autologin hook]
+  
+  T -->|apply_filters: um_registration_show_message_redirect_url| Y[Override redirect URL for status+message]
+  Y --> Z([End])
